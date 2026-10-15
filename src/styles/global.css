@@ -1,3 +1,13 @@
-  .xl{
-    font-size: 100rem;
-  }
+:root{
+  --primary: #15894bf7;
+  --secondary: #f5f4f4;
+  --text: black;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --white: #fff;
+  --black: #000;
+
+}
+
+.xl {
+  font-size: 100rem;
+}
