@@ -1,9 +1,103 @@
+---
+import backIcon from "../assets/back.svg";
+import logoIcon from "../assets/astro.svg";
+---
+
 <header>
-    <nav>
-        <ul>
-            <li>Pa atras</li>
-            <li>Title</li>
-            <li>Logo</li>
-        </ul>
+    <nav class="navbar container">
+        <div class="menu">
+            <ul class="menu-inner">
+                <li class="menu-item left">
+                    <a href="#" class="menu-link">
+                        <img
+                            src={backIcon.src}
+                            alt="Home icon"
+                            class="menu-svg"
+                        />
+                    </a>
+                </li>
+                <li class="menu-item center">
+                    <a href="#" class="menu-link">Title</a>
+                </li>
+                <li class="menu-item right">
+                        <a href="#" class="menu-link">
+                        <img
+                            src={logoIcon.src}
+                            alt="Home icon"
+                            class="menu-svg"
+                        />
+                    </a>
+                </li>
+            </ul>
+        </div>
     </nav>
 </header>
+
+<style>
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        width: 100%;
+        height: auto;
+        margin: 0 auto;
+        transition: all 0.35s ease;
+        box-shadow: 0 4px 6px var(--shadow);
+        background-color: var(--primary);
+    }
+
+    .navbar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        height: 4rem;
+        margin-inline: auto;
+        padding: 0 1.5rem;
+    }
+
+    .menu {
+        position: relative;
+        top: initial;
+        left: 0;
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+        padding-block: 0.5nsrem;
+        transition: all 0.3s ease;
+    }
+
+    .menu-inner {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        width: 100%;
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .menu-inner .left {
+        justify-self: start;
+    }
+
+    .menu-inner .center {
+        justify-self: center;
+    }
+
+    .menu-inner .right {
+        justify-self: end;
+        margin-right: 2.5rem;
+    }
+
+    .menu-link {
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 2rem;
+        font-weight: 500;
+        line-height: 1.5;
+        color: var(--white);
+        text-transform: capitalize;
+    }
+</style>
