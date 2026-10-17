@@ -1,4 +1,6 @@
-:root{
+@import url("https://fonts.googleapis.com/css2?family=Pathway+Extreme:wght@100..900&family=Pathway+Gothic+One&family=Special+Gothic+Expanded+One&display=swap");
+
+:root {
   --primary: #15894bf7;
   --secondary: #f5f4f4;
   --text: black;
@@ -8,6 +10,21 @@
   --white-400: #e0e0e0;
   --black: #000;
 
+  --font-title: "Special Gothic Expanded One", "Arial Black", system-ui, sans-serif;
+  --font-body: "Pathway Gothic One", "Arial Narrow", system-ui, sans-serif;
+  --font-alt: "Pathway Extreme", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 400;
 }
 
 .xl {
