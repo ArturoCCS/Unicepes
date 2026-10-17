@@ -1,36 +1,39 @@
 ---
 import backIcon from "../assets/back.svg";
 import logoIcon from "../assets/astro.svg";
+
+interface Props {
+  title?: string;
+  back?: string;
+}
+
+const { title, back } = Astro.props;
 ---
 
 <header>
-    <nav class="navbar container">
-        <div class="menu">
-            <ul class="menu-inner">
-                <li class="menu-item left">
-                    <a href="#" class="menu-link">
-                        <img
-                            src={backIcon.src}
-                            alt="Home icon"
-                            class="menu-svg"
-                        />
-                    </a>
-                </li>
-                <li class="menu-item center">
-                    <a href="#" class="menu-link">Title</a>
-                </li>
-                <li class="menu-item right">
-                        <a href="#" class="menu-link">
-                        <img
-                            src={logoIcon.src}
-                            alt="Home icon"
-                            class="menu-svg"
-                        />
-                    </a>
-                </li>
-            </ul>
-        </div>
+    <nav class="navbar container" aria-label="Principal">
+        <ul class="menu-inner">
+            <li class="menu-item left">
+                <a
+                    href={back ?? "/"}
+                    class="menu-link"
+                    aria-label="Volver"
+                    data-history-back={!back}
+                >
+                    <img src={backIcon.src} alt="" class="menu-svg" />
+                </a>
+            </li>
+           <li class="title">
+                <a href="#" class="menu-link" aria-label=`${title}`>{title}</a>
+           </li>
+            <li class="menu-item right">
+                <a href="#" class="menu-link" aria-label="UNICEPES">
+                    <img src={logoIcon.src} alt="" class="menu-svg" />
+                </a>
+            </li>
+        </ul>
     </nav>
+           
 </header>
 
 <style>
@@ -40,42 +43,26 @@ import logoIcon from "../assets/astro.svg";
         left: 0;
         z-index: 100;
         width: 100%;
-        height: auto;
-        margin: 0 auto;
-        transition: all 0.35s ease;
-        box-shadow: 0 4px 6px var(--shadow);
-        background-color: var(--primary);
     }
 
     .navbar {
         display: flex;
-        flex-direction: row;
         align-items: center;
+        box-sizing: border-box;
         width: 100%;
-        height: 4rem;
+        height: 3rem;
         margin-inline: auto;
-        padding: 0 1.5rem;
-    }
-
-    .menu {
-        position: relative;
-        top: initial;
-        left: 0;
-        width: 100%;
-        height: auto;
-        overflow: hidden;
-        padding-block: 0.5nsrem;
-        transition: all 0.3s ease;
+        padding: 4rem 1.5rem 4rem 1.5rem;
     }
 
     .menu-inner {
         display: grid;
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
         width: 100%;
         list-style: none;
         padding-left: 0;
-        margin: 0;
+        margin: 0 5%;
     }
 
     .menu-inner .left {
@@ -88,16 +75,48 @@ import logoIcon from "../assets/astro.svg";
 
     .menu-inner .right {
         justify-self: end;
-        margin-right: 2.5rem;
     }
 
     .menu-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
         text-decoration: none;
-        font-family: inherit;
-        font-size: 2rem;
-        font-weight: 500;
+        font-family: var(--font-title);
+        font-size: 4rem;
+        font-weight: 700;
         line-height: 1.5;
-        color: var(--white);
+        color: var(--black);
         text-transform: capitalize;
     }
+
+    .menu-link:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+    .menu-svg {
+        display: block;
+        height: 3rem;
+        width: auto;
+    }
+    .title{
+        position: absolute;
+        right: 42%;
+        top:90px;
+    }
 </style>
+
+<script>
+    document.querySelectorAll<HTMLAnchorElement>('a[data-history-back]').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            const cameFromSite =
+                document.referrer !== '' && new URL(document.referrer).origin === location.origin;
+            if (cameFromSite && history.length > 1) {
+                e.preventDefault();
+                history.back();
+            }
+        });
+    });
+</script>

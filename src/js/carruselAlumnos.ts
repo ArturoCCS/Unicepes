@@ -1,5 +1,5 @@
 const CFG = {
-    centerScale: 1.12, 
+    centerScale: 1.12,
     scaleStep: 0.2,
     minScale: 0.45,
     spacing: 1.06,
@@ -27,7 +27,7 @@ function init(container: HTMLElement) {
     const N = items.length;
     const visible = Math.max(1, Math.min(N, Number(container.dataset.visible) || 3));
     const maxOffset = (visible - 1) / 2;
-    const fadeEnd = Math.min(maxOffset + 1, N / 2); 
+    const fadeEnd = Math.min(maxOffset + 1, N / 2);
 
     let pos = 0;
     let target = 0;
@@ -147,7 +147,7 @@ function init(container: HTMLElement) {
     let startPos = 0;
     let lastX = 0;
     let lastMoveT = 0;
-    let vel = 0; // px/ms
+    let vel = 0;
     let downItem: HTMLElement | null = null;
 
     container.addEventListener('pointerdown', (e) => {
@@ -213,6 +213,9 @@ function init(container: HTMLElement) {
             e.stopPropagation();
         }
     }, true);
+
+    document.getElementById('last')?.addEventListener('click', () => step(-1));
+    document.getElementById('next')?.addEventListener('click', () => step(1));
 
     container.addEventListener('dragstart', (e) => e.preventDefault());
 
