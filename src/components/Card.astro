@@ -1,0 +1,72 @@
+---
+import imgIcon from "../assets/img.svg";
+
+interface Props {
+  name?: string;
+  semester?: string;
+}
+
+const { name, semester } = Astro.props;
+---
+
+<div class="card skeleton">
+  <figure>
+    <img src={imgIcon.src} alt="Home icon" class="menu-svg" />
+  </figure>
+
+  <div class="card__content">
+    <p class="skeleton-line title-line"></p>
+
+    <p class="skeleton-line desc-line"></p>
+  </div>
+</div>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex: 1 1 300px;
+    max-width: 320px;
+    width: 320px;
+    height: 450px;
+    background-color: var(--white-200);
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .card figure {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+  }
+
+  .card__content {
+    position: absolute;
+    bottom: 12%;
+    width: 100%;
+    justify-items: center;
+  }
+
+  .skeleton {
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+
+  .skeleton-line {
+    background-color: var(--white-400);
+    border-radius: 4px;
+    width: 80%;
+  }
+
+  .title-line {
+    height: 24px;
+    margin-bottom: 8px;
+  }
+
+  .desc-line {
+    height: 20px;
+    width: 60%;
+  }
+</style>

@@ -1,3 +1,15 @@
+---
+import Nav from "../components/Nav.astro";
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	back?: string;
+}
+
+const { title, back } = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -6,10 +18,13 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>{title}</title>
 	</head>
 	<body>
-		<slot />
+		<Nav title={title} back={back} />
+		<main>
+			<slot />
+		</main>
 	</body>
 </html>
 
