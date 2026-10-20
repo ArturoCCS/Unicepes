@@ -88,18 +88,19 @@ const alumnos = [
         z-index: 1;
     }
 
-    .carrusel-wrapper {
+  .carrusel-wrapper {
         position: relative;
         width: 100%;
-        height: 80vh;
+        height: 70vh;
+        margin-top: 4rem;
         z-index: 2;
     }
 
     #carrusel-container {
         position: relative;
         width: 100%;
-        height: 110%;
-        --card-w: clamp(280px, 72vw, 340px);
+        height: 100%;
+        --card-w: clamp(120px, 45vw, 360px);
         touch-action: pan-y;
         cursor: grab;
         user-select: none;
@@ -107,6 +108,7 @@ const alumnos = [
         -webkit-tap-highlight-color: transparent;
         outline: none;
     }
+
 
     #carrusel-container.dragging {
         cursor: grabbing;
@@ -133,13 +135,13 @@ const alumnos = [
         left: 50%;
         transform: translateX(-50%);
         z-index: 10;
-        width: 180px;
-        height: 60px;
+        width: 240px;
+        height: 80px;
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: center;
         background: rgb(27, 26, 26);
-        border-radius: 30px 30px 0 0;
+        border-radius: 40px 40px 0 0;
     }
 
     .nav-btn {
