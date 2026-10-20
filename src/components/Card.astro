@@ -21,20 +21,19 @@ const { name, semester } = Astro.props;
 </div>
 
 <style>
-  .card {
+.card {
     position: relative;
     display: flex;
     width: var(--card-w, 100%);
     max-width: 320px;
-    height: clamp(260px, 60vh, 380px);
+    height: var(--card-h, 300px);
     background-color: var(--white-200);
     align-items: center;
     flex-direction: column;
     border-radius: 12px;
     box-sizing: border-box;
     overflow: hidden;
-  }
-
+}
   .card figure {
     position: relative;
     width: 70%;
