@@ -3,6 +3,7 @@ const CFG = {
     scaleStep: 0.2,
     minScale: 0.45,
     spacing: 1.06,
+    gap: 0.08,
     dim: 0.22,
     blur: 0,
     smoothing: 110,
@@ -14,6 +15,7 @@ const CFG = {
 
 const mod = (n: number, m: number) => ((n % m) + m) % m;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+const scaleAt = (a: number) => Math.max(CFG.minScale, CFG.centerScale - CFG.scaleStep * a);
 
 function init(container: HTMLElement) {
     const items = Array.from(container.querySelectorAll<HTMLElement>('.carrusel-item'));
@@ -33,11 +35,29 @@ function init(container: HTMLElement) {
     let target = 0;
     let rendered = NaN;
     let spacing = 300;
+    let cardW = 300;
+    let xTable: number[] = [0, 0];
     let activeIdx = -1;
     let raf = 0;
     let lastFrame = 0;
     let dragging = false;
     const hidden: boolean[] = items.map(() => false);
+
+    function buildTable() {
+        const gapPx = cardW * CFG.gap;
+        const count = Math.ceil(N / 2) + 2;
+        xTable = [0];
+        for (let k = 0; k < count; k++) {
+            const half = (scaleAt(k) + scaleAt(k + 1)) / 2;
+            xTable.push(xTable[k] + cardW * half + gapPx);
+        }
+    }
+
+    function xAt(a: number) {
+        const k = Math.min(Math.floor(a), xTable.length - 2);
+        const f = a - k;
+        return xTable[k] + (xTable[k + 1] - xTable[k]) * f;
+    }
 
     function render() {
         rendered = pos;
@@ -63,11 +83,12 @@ function init(container: HTMLElement) {
                 hidden[i] = false;
             }
 
-            const scale = Math.max(CFG.minScale, CFG.centerScale - CFG.scaleStep * abs);
+            const scale = scaleAt(abs);
             const d = Math.min(abs, 2);
+            const x = Math.sign(o) * xAt(abs);
 
             el.style.transform =
-                `translate(-50%, -50%) translate3d(${(o * spacing).toFixed(2)}px, 0, 0) scale(${scale.toFixed(4)})`;
+                `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, 0, 0) scale(${scale.toFixed(4)})`;
             el.style.opacity = fade.toFixed(3);
             el.style.zIndex = String(Math.round(100 - abs * 10));
 
@@ -256,7 +277,9 @@ function init(container: HTMLElement) {
     function measure() {
         const w = items[0].offsetWidth;
         if (!w) return;
+        cardW = w;
         spacing = w * CFG.spacing;
+        buildTable();
         render();
     }
 
