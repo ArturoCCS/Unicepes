@@ -23,7 +23,7 @@ const { title, back } = Astro.props;
                     <img src={backIcon.src} alt="" class="menu-svg" />
                 </a>
             </li>
-           <li class="title">
+           <li class="title center">
                 <a href="#" class="menu-link" aria-label=`${title}`>{title}</a>
            </li>
             <li class="menu-item right">
@@ -103,7 +103,6 @@ const { title, back } = Astro.props;
     }
     .title{
         position: absolute;
-        right: 42%;
         top:90px;
     }
 </style>
