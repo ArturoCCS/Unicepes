@@ -81,6 +81,12 @@ const { title, back } = Astro.props;
         color: var(--black);
         text-transform: capitalize;
     }
+    @media (max-width: 640px) {
+    .nav-title {
+        margin-top: 0.5rem;
+        font-size: clamp(1.75rem, 9vw, 2.5rem);
+    }
+}
 </style>
 
 <script>
