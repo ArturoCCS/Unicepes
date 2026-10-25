@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  back?: string;
+  showTitle?: boolean;
+}
+
+const { title, back, showTitle = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style is:global>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	body {
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr);
+		height: 100vh;
+		height: 100dvh;
+		overflow: hidden;
+	}
+
+	main {
+		min-height: 0;
+		min-width: 0;
+		display: grid;
+		grid-template-rows: minmax(0, 1fr);
+	}
+</style>
