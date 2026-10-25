@@ -3,11 +3,12 @@ import Nav from "../components/Nav.astro";
 import '../styles/global.css';
 
 interface Props {
-	title: string;
-	back?: string;
+  title?: string;
+  back?: string;
+  showTitle?: boolean;
 }
 
-const { title, back } = Astro.props;
+const { title, back, showTitle = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -21,7 +22,7 @@ const { title, back } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body>
-		<Nav title={title} back={back} />
+		<Nav title={title} back={back} showTitle={showTitle} />
 		<main>
 			<slot />
 		</main>

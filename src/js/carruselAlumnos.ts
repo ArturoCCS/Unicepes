@@ -1,3 +1,5 @@
+export {};
+
 const CFG = {
     centerScale: 1.12,
     scaleStep: 0.2,

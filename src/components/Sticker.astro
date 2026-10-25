@@ -1,0 +1,91 @@
+---
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+    name?: string;
+    link?: string;
+    size?: "sm" | "md" | "lg";
+    icon: ImageMetadata; 
+}
+
+const { name = "Categoría", link = "#", size = "md", icon } = Astro.props;
+---
+
+<a href={link} class={`sticker sticker--${size}`} draggable="false">
+    <figure class="sticker__figure">
+        <img src={icon.src} alt={name} />
+    </figure>
+
+    <div class="sticker__label">
+        <span class="sticker__name">{name}</span>
+    </div>
+</a>
+
+<style>
+    .sticker {
+        position: relative;
+        display: inline-block;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        text-decoration: none;
+        box-sizing: border-box;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .sticker__figure {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+    }
+
+    .sticker__figure img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        pointer-events: none;
+        display: block;
+    }
+
+    .sticker--sm {
+        width: calc(var(--sticker-base, 120px) * 1.2);
+    }
+    .sticker--md {
+        width: calc(var(--sticker-base, 120px) * 2.4);
+    }
+    .sticker--lg {
+        width: calc(var(--sticker-base, 120px) * 3.6);
+    }
+
+    .sticker__label {
+        position: absolute;
+        bottom: -24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(6px);
+        background-color: #111111;
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        opacity: 0;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .sticker:hover .sticker__label,
+    .sticker:focus-visible .sticker__label,
+    :global(.sticker-item.dragging) .sticker__label {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
