@@ -1,0 +1,192 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Sticker from "../components/Sticker.astro";
+
+import imgDibujoEIlustracion from "../assets/astro.svg";
+import imgDiseñoDeMarca from "../assets/astro.svg";
+import imgDiseño from "../assets/astro.svg";
+import imgFotografia from "../assets/astro.svg";
+import imgHipermedia from "../assets/astro.svg";
+
+interface StickerData {
+    name: string;
+    link: string;
+    top: string;
+    left: string;
+    rotate: string;
+    size: "sm" | "md" | "lg";
+    icon: ImageMetadata; 
+}
+
+const stickers: StickerData[] = [
+    {
+        name: "Dibujo e Ilustración",
+        link: "/trabajos-crativos/dibujo-e-ilustración",
+        top: "25%",
+        left: "70%",
+        rotate: "8deg",
+        size: "lg",
+        icon: imgDibujoEIlustracion,
+    },
+    {
+        name: "Diseño de Marca",
+        link: "/trabajos-crativos/diseno-de-marca",
+        top: "60%",
+        left: "18%",
+        rotate: "12deg",
+        size: "sm",
+        icon: imgDiseñoDeMarca,
+    },
+    {
+        name: "Diseño",
+        link: "/trabajos-crativos/diseno",
+        top: "50%",
+        left: "75%",
+        rotate: "-12deg",
+        size: "lg",
+        icon: imgDiseño,
+    },
+    {
+        name: "Fotografía",
+        link: "/trabajos-crativos/fotografia",
+        top: "75%",
+        left: "45%",
+        rotate: "5deg",
+        size: "lg",
+        icon: imgFotografia,
+    },
+    {
+        name: "Hipermedia",
+        link: "/trabajos-crativos/hipermedia",
+        top: "15%",
+        left: "42%",
+        rotate: "-4deg",
+        size: "md",
+        icon: imgHipermedia,
+    },
+];
+---
+
+<Layout title="Trabajos Creativos" showTitle={false}>
+    <div id="page-bg" class="page-background">
+        <div id="bg-text" class="bg-watermark" aria-hidden="true">
+            Trabajos Creativos
+        </div>
+
+        <div class="sticker-wrapper">
+            <div
+                id="sticker-container"
+                tabindex="0"
+                aria-label="Categorías de Trabajos"
+            >
+                {
+                    stickers.map((sticker, i) => (
+                        <div
+                            class="sticker-item"
+                            style={`--top: ${sticker.top}; --left: ${sticker.left}; --rot: ${sticker.rotate};`}
+                        >
+                            <Sticker
+                                name={sticker.name}
+                                link={sticker.link}
+                                size={sticker.size}
+                                icon={sticker.icon}
+                            />
+                        </div>
+                        
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .page-background {
+        --sticker-base: clamp(96px, 24vw, 160px);
+        position: relative;
+        width: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .sticker-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    #sticker-container {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        outline: none;
+    }
+
+    .sticker-item {
+        position: absolute;
+        top: var(--top);
+        left: var(--left);
+        transform: translate(-50%, -50%) rotate(var(--rot));
+        translate: var(--dx, 0px) var(--dy, 0px);
+        transition: transform 0.3s cubic-bezier(0, 1, 0.5, 1);
+        will-change: transform, translate;
+        touch-action: none;
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sticker-item:hover {
+        transform: translate(-50%, -50%) rotate(0deg) scale(1.1);
+    }
+
+    .sticker-item.dragging {
+        cursor: grabbing;
+        transform: translate(-50%, -50%) rotate(0deg) scale(1.12);
+    }
+    .bg-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: clamp(4rem, 20vw, 16rem);
+        font-weight: 900;
+        color: rgba(74, 66, 66, 0.114);
+        text-transform: uppercase;
+        user-select: none;
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+        .page-background {
+            height: auto;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        #sticker-container {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            padding: 5rem 1rem 3rem 1rem;
+            inset: auto;
+            justify-items: center;
+        }
+        .sticker-item {
+            position: relative;
+            top: auto !important;
+            left: auto !important;
+            transform: rotate(var(--rot)) !important;
+        }
+        .sticker-item:hover {
+            transform: rotate(0deg) scale(1.05) !important;
+        }
+    }
+</style>
+
+<script>
+    import "../js/stickerDrag";
+</script>

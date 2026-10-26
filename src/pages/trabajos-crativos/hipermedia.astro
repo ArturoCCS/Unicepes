@@ -1,0 +1,848 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Hipermedia">
+    <div class="hm scroller" id="scroller">
+        <div class="track" id="track">
+            <div class="pin" id="pin">
+                <div class="progress" aria-hidden="true"><i id="prog"></i></div>
+
+                <div class="stage rise">
+                    <nav class="rail" id="cats" aria-label="Categorías">
+                        <span class="rail-ind" id="railInd" aria-hidden="true"
+                        ></span>
+                    </nav>
+
+                    <aside
+                        class="thumbs"
+                        id="thumbs"
+                        aria-label="Videos de la categoría"
+                    >
+                    </aside>
+
+                    <div class="viewer" id="viewer">
+                        <div id="layers"></div>
+
+                        <div class="hud">
+                            <span class="chip"
+                                ><span id="clipName">—</span><small
+                                    id="clipCount"></small></span
+                            >
+                            <button
+                                class="clip-mute"
+                                id="clipMute"
+                                aria-label="Silenciar este clip"></button>
+                        </div>
+
+                        <div class="cat-title" aria-hidden="true">
+                            <span id="catTitle"></span>
+                        </div>
+
+                        <div class="cue chip" id="cue">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                ><path d="M12 5v14M5 12l7 7 7-7"></path></svg
+                            >
+                            <span id="cueText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bar rise" style="--d:.15s">
+                    <div
+                        class="lane"
+                        id="lane"
+                        tabindex="0"
+                        role="slider"
+                        aria-label="Línea de tiempo"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
+                        <div class="blocks" id="blocks"></div>
+                        <div class="playhead" id="playhead"></div>
+                    </div>
+                </div>
+
+                <div class="bar controls rise" style="--d:.25s">
+                    <button class="btn" id="prev" aria-label="Video anterior"
+                        ><svg viewBox="0 0 24 24"
+                            ><path d="M6 6h2v12H6zM9.5 12 18 6v12z"></path></svg
+                        ></button
+                    >
+                    <button
+                        class="btn btn--play"
+                        id="play"
+                        aria-label="Avance automático"
+                        ><svg id="playIcon" viewBox="0 0 24 24"></svg></button
+                    >
+                    <button class="btn" id="next" aria-label="Video siguiente"
+                        ><svg viewBox="0 0 24 24"
+                            ><path d="M16 6h2v12h-2zM6 18V6l8.5 6z"></path></svg
+                        ></button
+                    >
+                    <span class="spacer"></span>
+                    <span class="tc" id="tc">00:00 <small>/ 00:00</small></span>
+                    <button class="btn" id="theme" aria-label="Cambiar tema"
+                    ></button>
+                    <button class="btn" id="mute" aria-label="Silenciar todo"
+                        ><svg id="muteIcon" viewBox="0 0 24 24"></svg></button
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style is:global>
+    .hm {
+        --bg: #ffffff;
+        --soft: #f4f4f5;
+        --line: #e4e4e7;
+        --ink: #0d0d0d;
+        --dim: #6b6b75;
+        --accent: #7c4dff;
+        --rec: #ff2d2d;
+        --on-ink: #ffffff;
+        --bar-bg: rgba(0, 0, 0, 0.09);
+        --chip-bg: rgba(255, 255, 255, 0.92);
+        --chip-bd: rgba(255, 255, 255, 0.9);
+        --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+        background: var(--bg);
+        color: var(--ink);
+        height: 100%;
+        min-height: 0;
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        outline: none;
+    }
+    .hm::-webkit-scrollbar {
+        display: none;
+    }
+    .hm {
+        transition:
+            background-color 0.4s,
+            color 0.4s;
+    }
+
+    .hm[data-theme="dark"] {
+        --bg: #0d0d10;
+        --soft: #1a1a20;
+        --line: #2c2c35;
+        --ink: #f4f4f5;
+        --dim: #9b9ba8;
+        --on-ink: #0d0d10;
+        --bar-bg: rgba(255, 255, 255, 0.12);
+        --chip-bg: rgba(22, 22, 28, 0.82);
+        --chip-bd: rgba(255, 255, 255, 0.1);
+    }
+    .hm[data-theme="dark"] .ph {
+        filter: brightness(0.78) saturate(0.95);
+    }
+    .hm[data-theme="dark"] .thumb.is-active {
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+    }
+    .hm,
+    .hm * {
+        box-sizing: border-box;
+    }
+    .hm button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        margin: 0;
+    }
+    .hm button:focus-visible,
+    .hm .lane:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+    }
+
+    .hm .track {
+        position: relative;
+    }
+    .hm .pin {
+        position: sticky;
+        top: 0;
+        height: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 6px 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hm .rise {
+        animation: hm-rise 0.7s var(--ease) both;
+        animation-delay: var(--d, 0s);
+    }
+    @keyframes hm-rise {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    .hm .progress {
+        height: 3px;
+        border-radius: 3px;
+        background: var(--line);
+        overflow: hidden;
+        flex: none;
+    }
+    .hm .progress i {
+        display: block;
+        height: 100%;
+        background: var(--ink);
+        transform-origin: left;
+        transform: scaleX(0);
+    }
+
+    .hm .stage {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 84px 148px minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .hm .rail {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .hm .rail-ind {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 0;
+        border-radius: 14px;
+        background: var(--ink);
+        transition:
+            transform 0.55s var(--ease),
+            width 0.55s var(--ease),
+            height 0.55s var(--ease);
+    }
+    .hm .cat {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-height: 64px;
+        max-height: 116px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 4px 14px;
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        color: var(--dim);
+        font-size: 11.5px;
+        font-weight: 600;
+        transition:
+            color 0.3s,
+            border-color 0.3s,
+            transform 0.3s var(--ease);
+    }
+    .hm .cat:hover {
+        color: var(--ink);
+        transform: translateX(3px);
+    }
+    .hm .cat.is-active {
+        color: var(--on-ink);
+        border-color: transparent;
+        transform: none;
+    }
+    .hm .cat svg {
+        width: 22px;
+        height: 22px;
+        flex: none;
+        transition: transform 0.4s var(--ease);
+    }
+    .hm .cat.is-active svg {
+        transform: scale(1.15) rotate(-6deg);
+    }
+    .hm .cat-bar {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 8px;
+        height: 3px;
+        border-radius: 3px;
+        background: var(--bar-bg);
+        overflow: hidden;
+    }
+    .hm .cat.is-active .cat-bar {
+        background: color-mix(in srgb, var(--on-ink) 25%, transparent);
+    }
+    .hm .cat-bar i {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+    }
+    .hm .cat.is-active .cat-bar i {
+        background: var(--on-ink);
+    }
+
+    .hm .thumbs {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
+        padding: 2px;
+        scrollbar-width: none;
+    }
+    .hm .thumbs::-webkit-scrollbar {
+        display: none;
+    }
+    .hm .thumb {
+        position: relative;
+        flex: none;
+        min-height: 84px;
+        overflow: hidden;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 8px 14px;
+        text-align: center;
+        transition:
+            transform 0.35s var(--ease),
+            border-color 0.25s,
+            background 0.25s,
+            box-shadow 0.35s;
+    }
+    .hm .thumb:hover {
+        transform: translateX(3px);
+        border-color: var(--ink);
+    }
+    .hm .thumb.is-active {
+        border-color: var(--ink);
+        background: var(--soft);
+        transform: translateX(7px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .hm .thumb-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1.5px solid var(--dim);
+        color: var(--dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+            background 0.25s,
+            color 0.25s,
+            border-color 0.25s,
+            transform 0.35s var(--ease);
+    }
+    .hm .thumb-icon svg {
+        width: 11px;
+        height: 11px;
+        fill: currentColor;
+        margin-left: 1px;
+    }
+    .hm .thumb.is-active .thumb-icon {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        transform: scale(1.15);
+    }
+    .hm .thumb-name {
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    .hm .thumb-dur {
+        font-size: 11px;
+        color: var(--dim);
+    }
+    .hm .thumb-bar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 0;
+        background: var(--accent);
+    }
+
+    .hm .viewer {
+        position: relative;
+        min-height: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--soft);
+        border: 1px solid var(--line);
+    }
+    .hm .viewer::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.28),
+            transparent 45%
+        );
+    }
+
+    .hm .layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    clip-path: inset(100% 0 0 0);
+    transform: scale(1.05);
+    transition: 
+        clip-path 0.4s var(--ease),
+        transform 0.5s var(--ease),
+        opacity 0.3s ease;
+}
+    .hm .layer.is-past {
+        z-index: 1;
+        clip-path: inset(0);
+        transform: translateY(-8%) scale(0.95);
+        opacity: 0;
+    }
+    .hm .layer.is-active {
+        z-index: 2;
+        clip-path: inset(0);
+        transform: none;
+        opacity: 1;
+        transition-delay: 0s;
+    }
+    .hm .layer-inner {
+        position: absolute;
+        inset: 0;
+        transform: scale(var(--z, 1));
+        will-change: transform;
+    }
+    .hm .layer video,
+    .hm .ph {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .hm .ph {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(150deg, var(--c1), var(--c2));
+    }
+    .hm .ph-play {
+        position: relative;
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: rgba(13, 13, 13, 0.32);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translate(
+            calc(var(--px, 0) * 16px),
+            calc(var(--py, 0) * 16px)
+        );
+        transition: transform 0.25s ease-out;
+    }
+    .hm .ph-play::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        animation: hm-ring 2.4s ease-out infinite;
+    }
+    @keyframes hm-ring {
+        from {
+            transform: scale(1);
+            opacity: 0.9;
+        }
+        to {
+            transform: scale(1.9);
+            opacity: 0;
+        }
+    }
+    .hm .ph-play svg {
+        width: 34px;
+        height: 34px;
+        fill: #fff;
+        margin-left: 4px;
+    }
+
+    .hm .hud {
+        position: absolute;
+        z-index: 4;
+        left: 14px;
+        right: 14px;
+        top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none;
+    }
+    .hm .chip {
+        background: var(--chip-bg);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--chip-bd);
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ink);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .hm .chip small {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--dim);
+        margin-left: 8px;
+    }
+    .hm .clip-mute {
+        pointer-events: auto;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        padding: 0;
+        background: var(--chip-bg);
+        border: 1px solid var(--chip-bd);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s var(--ease);
+    }
+    .hm .clip-mute:hover {
+        transform: scale(1.1);
+    }
+    .hm .clip-mute.is-muted {
+        color: var(--rec);
+    }
+    .hm .clip-mute svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+
+    .hm .cat-title {
+        position: absolute;
+        z-index: 4;
+        left: 22px;
+        bottom: 16px;
+        max-width: 68%;
+        overflow: hidden;
+        pointer-events: none;
+        padding-bottom: 4px;
+        line-height: 1.05;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #fff;
+        font-size: clamp(32px, 6vw, 76px);
+        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
+    }
+    .hm .cat-title span {
+        display: block;
+    }
+
+    .hm .cue {
+        position: absolute;
+        z-index: 4;
+        right: 14px;
+        bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        transition:
+            opacity 0.4s,
+            transform 0.5s var(--ease);
+        pointer-events: none;
+    }
+    .hm .cue.is-hidden {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    .hm .cue svg {
+        width: 14px;
+        height: 14px;
+        animation: hm-bob 1.4s ease-in-out infinite;
+    }
+    @keyframes hm-bob {
+        0%,
+        100% {
+            transform: translateY(-2px);
+        }
+        50% {
+            transform: translateY(3px);
+        }
+    }
+
+    .hm .bar {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+    }
+    .hm .lane {
+        position: relative;
+        height: 62px;
+        overflow: hidden;
+        border-radius: 13px;
+        cursor: pointer;
+        user-select: none;
+        touch-action: none;
+    }
+    .hm .blocks {
+        display: flex;
+        height: 100%;
+    }
+    .hm .block {
+        position: relative;
+        min-width: 0;
+        padding: 9px 12px;
+        border-right: 2px solid var(--bg);
+        background: var(--soft);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: background 0.3s;
+    }
+    .hm .block:last-child {
+        border-right: none;
+    }
+    .hm .block.is-active {
+        background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+    }
+    .hm .block-fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0;
+        background: color-mix(in srgb, var(--accent) 26%, transparent);
+        pointer-events: none;
+    }
+    .hm .block-name,
+    .hm .block-dur {
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .hm .block-name {
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .hm .block-dur {
+        font-size: 11px;
+        color: var(--dim);
+    }
+    .hm .playhead {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        left: 0;
+        z-index: 4;
+        background: var(--rec);
+        box-shadow: 0 0 8px rgba(255, 45, 45, 0.55);
+        pointer-events: none;
+    }
+    .hm .playhead::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 10px;
+        height: 8px;
+        transform: translateX(-50%);
+        background: var(--rec);
+        border-radius: 0 0 3px 3px;
+    }
+
+    .hm .controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .hm .btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        flex: none;
+        padding: 0;
+        background: var(--soft);
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+            background 0.2s,
+            transform 0.2s var(--ease),
+            color 0.2s;
+    }
+    .hm .btn:hover {
+        background: var(--line);
+        transform: translateY(-2px);
+    }
+    .hm .btn:active {
+        transform: scale(0.92);
+    }
+    .hm .btn svg {
+        width: 15px;
+        height: 15px;
+        fill: currentColor;
+    }
+    .hm .btn--play {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--on-ink);
+    }
+    .hm .btn--play:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+    }
+    .hm .btn.is-muted {
+        color: var(--rec);
+        border-color: var(--rec);
+    }
+    .hm .spacer {
+        flex: 1;
+    }
+    .hm .tc {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        font-variant-numeric: tabular-nums;
+    }
+    .hm .tc small {
+        color: var(--dim);
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    @media (max-width: 720px) {
+        .hm .pin {
+            padding: 6px 12px 14px;
+            gap: 10px;
+        }
+        .hm .stage {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto auto minmax(0, 1fr);
+            gap: 10px;
+        }
+        .hm .rail {
+            flex-direction: row;
+            gap: 6px;
+        }
+        .hm .cat {
+            min-height: 54px;
+            max-height: none;
+            font-size: 11px;
+            gap: 4px;
+            padding: 6px 2px 12px;
+        }
+        .hm .cat:hover {
+            transform: none;
+        }
+        .hm .cat svg {
+            width: 18px;
+            height: 18px;
+        }
+        .hm .cat-bar {
+            left: 8px;
+            right: 8px;
+            bottom: 6px;
+        }
+        .hm .thumbs {
+            flex-direction: row;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .hm .thumb {
+            min-width: 108px;
+            min-height: 62px;
+            padding: 8px 6px 12px;
+            gap: 3px;
+        }
+        .hm .thumb:hover,
+        .hm .thumb.is-active {
+            transform: translateY(-2px);
+        }
+        .hm .lane {
+            height: 52px;
+        }
+        .hm .block {
+            padding: 7px 8px;
+        }
+        .hm .block-dur {
+            display: none;
+        }
+        .hm .block-name {
+            font-size: 11px;
+        }
+        .hm .tc small {
+            display: none;
+        }
+        .hm .cat-title {
+            left: 14px;
+            bottom: 12px;
+            max-width: 60%;
+        }
+        .hm .cue {
+            right: 10px;
+            bottom: 12px;
+            font-size: 11.5px;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .hm .rise,
+        .hm .cue svg,
+        .hm .ph-play::after {
+            animation: none;
+        }
+        .hm .layer {
+            transition: opacity 0.2s linear;
+            transform: none !important;
+            clip-path: none;
+            opacity: 0;
+        }
+        .hm .layer.is-active {
+            opacity: 1;
+        }
+        .hm .layer-inner {
+            transform: none !important;
+        }
+        .hm .rail-ind {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    import "../../js/hipermedia";
+</script>

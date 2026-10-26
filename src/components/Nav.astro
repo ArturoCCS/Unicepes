@@ -5,9 +5,10 @@ import logoIcon from "../assets/astro.svg";
 interface Props {
   title?: string;
   back?: string;
+  showTitle?: boolean;
 }
 
-const { title, back } = Astro.props;
+const { title, back, showTitle} = Astro.props;
 ---
 
 <header>
@@ -27,7 +28,9 @@ const { title, back } = Astro.props;
             </a>
         </div>
 
-        <h1 class="nav-title">{title}</h1>
+        <h1 class:list={["nav-title", { "is-hidden": !showTitle }]}>
+            {title}
+        </h1>
     </nav>
 </header>
 
@@ -81,12 +84,17 @@ const { title, back } = Astro.props;
         color: var(--black);
         text-transform: capitalize;
     }
-    @media (max-width: 640px) {
-    .nav-title {
-        margin-top: 0.5rem;
-        font-size: clamp(1.55rem, 9vw, 2.1rem);
+
+    .nav-title.is-hidden {
+        display: none; 
     }
-}
+
+    @media (max-width: 640px) {
+        .nav-title {
+            margin-top: 0.5rem;
+            font-size: clamp(1.55rem, 9vw, 2.1rem);
+        }
+    }
 </style>
 
 <script>
