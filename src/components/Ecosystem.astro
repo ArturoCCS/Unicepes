@@ -1,0 +1,258 @@
+---
+import ImageCard from "./Card.astro";
+
+interface Mockup {
+  src: string;
+  span?: "full" | "half" | "third" | "tall";
+  alt?: string;
+}
+interface Item {
+  src: string;
+  alt?: string;
+  title?: string;
+  description?: string;
+  size?: number;
+  tags?: string[];
+  mockups?: Mockup[];
+  autor?: string;
+}
+interface Props {
+  items?: Item[];
+  title?: string;
+}
+
+const { items = [], title } = Astro.props;
+
+const data = JSON.stringify(
+  items.map((i) => ({
+    name: i.title,
+    description: i.description,
+    tags: i.tags,
+    autor: i.autor,
+    mockups: i.mockups,
+  }))
+).replace(/</g, "\\u003c");
+---
+
+<section class="ecosystem" id="ecosystem">
+  {title && <h1 class="center-title">{title}</h1>}
+
+  {
+    items.map((i) => (
+      <ImageCard
+        src={i.src}
+        alt={i.alt}
+        title={i.title}
+        autor={i.autor}
+        description={i.description}
+        size={i.size}
+      />
+    ))
+  }
+
+  <article class="case" id="case" aria-label="Detalle de marca">
+    <button type="button" class="case__close" id="case-close" aria-label="Cerrar">✕</button>
+
+    <div class="case__scroll" id="case-scroll">
+      <header class="hero">
+        <img id="case-logo" alt="" />
+        <div class="hero__text">
+          <h2 id="case-name"></h2>
+          <p id="case-autor"></p>
+          <p id="case-desc"></p>
+          <ul id="case-tags"></ul>
+        </div>
+      </header>
+
+      <div class="grid" id="case-grid"></div>
+    </div>
+  </article>
+
+  <script is:inline type="application/json" id="brands-data" set:html={data}></script>
+</section>
+
+<style>
+  .ecosystem {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--white);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .ecosystem.is-dragging { cursor: grabbing; }
+
+  .center-title {
+    position: absolute;
+    inset: 40% auto auto 50%;
+    translate: -50% -50%;
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 800;
+    z-index: 0;
+    font-size: clamp(2rem, 2.4vw, 2.6rem);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .ecosystem.is-open .center-title { opacity: 0; }
+
+  .ecosystem :global(.expanded) {
+    position: fixed;
+    z-index: 1000;
+    border-radius: 10px;
+    object-fit: contain;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .case {
+    position: absolute;
+    inset: 0;
+    z-index: 900;
+    background: var(--white);
+    opacity: 0;
+    visibility: hidden;
+    cursor: default;
+    transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+  }
+  .case.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.45s ease;
+  }
+
+  .case__scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  .case__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    background: rgb(0 0 0 / 0.07);
+    transition: background 0.2s ease;
+  }
+  .case__close:hover { background: rgb(0 0 0 / 0.14); }
+
+  .hero {
+    min-height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 72px 24px 48px;
+    text-align: center;
+  }
+  .hero img {
+    height: min(46dvh, 420px);
+    width: auto;
+    max-width: 80vw;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+  .hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-width: 52ch;
+  }
+  .hero h2 { margin: 0; font-size: clamp(1.6rem, 4vw, 3rem); line-height: 1.05; }
+  .hero p { margin: 0; font-size: 0.9rem; opacity: 0.7; }
+  .hero p:empty { display: none; }
+  .hero ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hero ul :global(li) {
+    padding: 3px 10px;
+    border: 1px solid rgb(0 0 0 / 0.18);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+  }
+
+  .hero__text,
+  .grid {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .case.is-revealed .hero__text,
+  .case.is-revealed .grid {
+    opacity: 1;
+    transform: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-flow: dense;
+    gap: 12px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 56px) 96px;
+  }
+
+  .grid :global(.m) {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--white-200, #e8e6e1);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.8, 0.2, 1);
+  }
+  .grid :global(.m.in) { opacity: 1; transform: none; }
+  .grid :global(.m img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .grid :global(.m--full)  { grid-column: span 12; aspect-ratio: 16 / 9; }
+  .grid :global(.m--half)  { grid-column: span 6;  aspect-ratio: 4 / 3; }
+  .grid :global(.m--third) { grid-column: span 4;  aspect-ratio: 1; }
+  .grid :global(.m--tall)  { grid-column: span 4;  aspect-ratio: 3 / 4; }
+
+  @media (max-width: 700px) {
+    .grid :global(.m--half)  { grid-column: span 12; }
+    .grid :global(.m--third),
+    .grid :global(.m--tall)  { grid-column: span 6; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__text, .grid, .grid :global(.m) { transition: none; transform: none; }
+  }
+</style>
+
+<script>
+    import "../js/marcas";
+</script>

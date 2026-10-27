@@ -1,83 +1,77 @@
 ---
-import imgIcon from "../assets/img.svg";
 
 interface Props {
-  name?: string;
-  semester?: string;
+  src: string;
+  alt?: string;
+  title?: string;
+  description?: string;
+  size?: number;
+  autor?: string;
 }
 
-const { name, semester } = Astro.props;
+const { src, alt = "", title, description, size = 1 } = Astro.props;
 ---
 
-<div class="card skeleton">
-  <figure>
-    <img src={imgIcon.src} alt="Home icon" class="menu-svg" />
+<button
+  type="button"
+  class="node"
+  style={`--size:${size};`}
+  data-title={title}
+  data-description={description}
+  aria-label={title ?? alt ?? "Abrir imagen"}
+>
+  <figure class="card">
+    <img src={src} alt={alt} draggable="false" />
   </figure>
-
-  <div class="card__content">
-    <p class="skeleton-line title-line"></p>
-    <p class="skeleton-line desc-line"></p>
-  </div>
-</div>
+  {title && <span class="label" aria-hidden="true">{title}</span>}
+</button>
 
 <style>
-.card {
-    position: relative;
-    display: flex;
-    width: var(--card-w, 100%);
-    max-width: 320px;
-    height: var(--card-h, 300px);
-    background-color: var(--white-200);
-    align-items: center;
-    flex-direction: column;
-    border-radius: 12px;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-  .card figure {
-    position: relative;
-    width: 70%;
-    max-width: 200px;
-    height: auto;
-    aspect-ratio: 1;
-    margin-top: 12%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .card figure img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .card__content {
+  .node {
     position: absolute;
-    bottom: 10%;
+    left: 50%;
+    top: 50%;
+    width: calc(clamp(56px, 9vw, 150px) * var(--size));
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: inherit;
+    opacity: 0;
+    will-change: transform, opacity;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .node:focus-visible { outline: none; }
+
+  .card {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 6px;
+    background-color: var(--white-200, #e8e6e1);
+    transition: transform 0.35s ease;
+  }
+  .card img {
+    display: block;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
-  .skeleton {
-    animation: pulse 1.5s infinite ease-in-out;
-  }
+  .node:hover .card,
+  .node:focus-visible .card { transform: scale(1.1); }
 
-  .skeleton-line {
-    background-color: var(--white-400);
-    border-radius: 4px;
-    width: 80%;
+  .label {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
   }
-
-  .title-line {
-    height: 24px;
-    margin-bottom: 8px;
-  }
-
-  .desc-line {
-    height: 20px;
-    width: 60%;
-  }
+  .node:hover .label,
+  .node:focus-visible .label { opacity: 1; }
 </style>
