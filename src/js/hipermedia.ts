@@ -6,7 +6,7 @@ const CATEGORIAS: Categoria[] = [
     label: "Animación", title: "Animaciones", color: "#7c4dff",
     icon: '<path d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"/>',
     clips: [
-      { name: "Intro Logo", duration: 28, src: "/video-ejemplo.mp4", c1: "#cbbcf3", c2: "#9d88dd" },
+      { name: "Intro Logo", duration: 4, src: "", c1: "#cbbcf3", c2: "#9d88dd" },
       { name: "Personajes", duration: 6, src: "", c1: "#b7e8d4", c2: "#7cc2a6" },
       { name: "Transición", duration: 3, src: "", c1: "#ffd5b4", c2: "#f0a16f" }
     ]
