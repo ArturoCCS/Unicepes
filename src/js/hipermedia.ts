@@ -6,7 +6,7 @@ const CATEGORIAS: Categoria[] = [
     label: "Animación", title: "Animaciones", color: "#7c4dff",
     icon: '<path d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"/>',
     clips: [
-      { name: "Intro Logo", duration: 28, src: "/video-ejemplo.mp4", c1: "#cbbcf3", c2: "#9d88dd" },
+      { name: "Intro Logo", duration: 4, src: "", c1: "#cbbcf3", c2: "#9d88dd" },
       { name: "Personajes", duration: 6, src: "", c1: "#b7e8d4", c2: "#7cc2a6" },
       { name: "Transición", duration: 3, src: "", c1: "#ffd5b4", c2: "#f0a16f" }
     ]
@@ -71,6 +71,8 @@ let active = -1, curCat = -1, playing = false, masterMuted = false;
 let layers: HTMLElement[] = [], railBtns: HTMLElement[] = [], catFills: HTMLElement[] = [];
 let blocks: HTMLElement[] = [], fills: HTMLElement[] = [], thumbs: HTMLElement[] = [], tbars: HTMLElement[] = [];
 let lastScrollAt = 0, autoPos = 0, cueState = '';
+let anim: { from: number; to: number; t0: number; dur: number } | null = null;
+let navGi = 0, liveIdx = -1;
 
 const pad = (v: number) => String(Math.floor(v)).padStart(2, '0');
 const mmss = (s: number) => pad(s / 60) + ':' + pad(s % 60);
@@ -81,7 +83,7 @@ flat.forEach(({ clip }) => {
   const l = document.createElement('div');
   l.className = 'layer';
   l.innerHTML = '<div class="layer-inner">' + (clip.src
-    ? `<video muted loop playsinline preload="none" data-src="${clip.src}"></video>`
+    ? `<video muted playsinline preload="none" data-src="${clip.src}"></video>`
     : `<div class="ph" style="--c1:${clip.c1};--c2:${clip.c2}"><div class="ph-play"><svg viewBox="0 0 24 24">${I_PLAY}</svg></div></div>`) + '</div>';
   layersEl.appendChild(l);
 });
@@ -111,12 +113,12 @@ function moveIndicator() {
   railInd.style.transform = `translate(${b.offsetLeft}px, ${b.offsetTop}px)`;
 }
 function layout() {
-    const H = sc.clientHeight;
-    slot = Math.max(H * 1.2, 700); 
-    scrollLen = slot * N;
-    pin.style.height = H + 'px';
-    track.style.height = (H + scrollLen) + 'px';
-    moveIndicator();
+  const H = sc.clientHeight;
+  slot = Math.max(H * 1.2, 700);
+  scrollLen = slot * N;
+  pin.style.height = H + 'px';
+  track.style.height = (H + scrollLen) + 'px';
+  moveIndicator();
 }
 
 function setCategory(c: number) {
@@ -163,7 +165,9 @@ function centerThumb(i: number) {
 function warm(gi: number) {
   [gi - 1, gi, gi + 1].forEach(k => {
     const v = vid(k);
-    if (v && !v.getAttribute('src') && v.dataset.src) { v.src = v.dataset.src; v.preload = 'metadata'; }
+    if (!v || !v.dataset.src) return;
+    if (!v.getAttribute('src')) v.src = v.dataset.src;
+    v.preload = k === gi ? 'auto' : 'metadata';
   });
 }
 
@@ -196,7 +200,7 @@ function setCue(text: string | null) {
   cueEl.classList.toggle('is-hidden', !text);
 }
 
-function render(p: number, moving: boolean) {
+function render(p: number, live: boolean) {
   const raw = p * N;
   const gi = Math.min(N - 1, Math.floor(raw));
   const local = p >= 1 ? 1 : raw - gi;
@@ -225,11 +229,14 @@ function render(p: number, moving: boolean) {
   else setCue(null);
 
   const v = vid(gi);
-  if (v && isFinite(v.duration)) {
-    const want = local * v.duration;
-    if (Math.abs(v.currentTime - want) > 0.45) v.currentTime = want;
-    if (moving && v.paused) v.play().catch(() => {});
-    if (!moving && !v.paused) v.pause();
+  if (v && isFinite(v.duration) && v.duration > 0) {
+    if (live) {
+      if (v.paused && !v.ended) v.play().catch(() => {});
+    } else {
+      if (!v.paused) v.pause();
+      const want = Math.min(local * v.duration, v.duration - 0.05);
+      if (!v.seeking && Math.abs(v.currentTime - want) > 0.04) v.currentTime = want;
+    }
   }
 }
 
@@ -237,27 +244,38 @@ let last = performance.now();
 function loop(now: number) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
 
-  if (playing) {
-    if (Math.abs(sc.scrollTop - autoPos) > 2) autoPos = sc.scrollTop;
-    const idx = Math.min(N - 1, Math.floor(pd * N));
-    autoPos = Math.min(scrollLen, autoPos + (slot / flat[idx].clip.duration) * dt);
-    sc.scrollTo(0, autoPos);
+  if (anim) {
+    const t = clamp((now - anim.t0) / anim.dur, 0, 1);
+    sc.scrollTop = anim.from + (anim.to - anim.from) * (1 - Math.pow(1 - t, 3));
+    if (t >= 1) { anim = null; autoPos = sc.scrollTop; }
+  } else if (playing) {
+    const idx = clamp(Math.floor(autoPos / slot), 0, N - 1);
+    const v = vid(idx);
+    if (idx !== liveIdx) { liveIdx = idx; if (v && v.readyState > 0) v.currentTime = 0; }
+
+    if (v && isFinite(v.duration) && v.duration > 0 && v.readyState >= 2) {
+      autoPos = idx * slot + clamp(v.currentTime / v.duration, 0, 1) * slot;
+      if (v.ended || v.currentTime >= v.duration - 0.05) autoPos = (idx + 1) * slot + 1;
+    } else {
+      autoPos += (slot / flat[idx].clip.duration) * dt;
+    }
+    autoPos = Math.min(scrollLen, autoPos);
+    sc.scrollTop = autoPos;
     if (autoPos >= scrollLen) setPlaying(false);
   }
 
   const target = clamp(sc.scrollTop / scrollLen, 0, 1);
   const diff = target - pd;
   pd = Math.abs(diff) < 0.0002 ? target : pd + diff * (1 - Math.exp(-dt * 10));
-  const moving = playing || Math.abs(diff) > 0.0005 || now - lastScrollAt < 250;
-  render(pd, moving);
+  render(pd, playing && !anim);
   requestAnimationFrame(loop);
 }
-sc.addEventListener('scroll', () => {
-    const scrollTop = sc.scrollTop;
-    const p = clamp(scrollTop / scrollLen, 0, 1);
-    
-    render(p, true);
-}, { passive: true });
+
+sc.addEventListener('scroll', () => { lastScrollAt = performance.now(); }, { passive: true });
+
+['wheel', 'touchstart'].forEach(ev =>
+  sc.addEventListener(ev, () => { anim = null; setPlaying(false); }, { passive: true }));
+sc.addEventListener('keydown', () => { anim = null; setPlaying(false); });
 
 let rt: ReturnType<typeof setTimeout>;
 new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(layout, 120); }).observe(sc);
@@ -265,26 +283,39 @@ new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(layout, 120); }).ob
 function scrollToP(p: number, smooth: boolean) {
   sc.scrollTo({ top: clamp(p, 0, 1) * scrollLen, behavior: smooth && !reduced ? 'smooth' : 'auto' });
 }
+
 function goTo(gi: number) {
   gi = clamp(gi, 0, N - 1);
-  const near = Math.abs(gi - pd * N) <= 1.6;
-  scrollToP((gi + 0.001) / N, near);
-  autoPos = (gi + 0.001) / N * scrollLen;
+  navGi = gi;
+  const to = (gi + 0.001) * slot;
+  const from = sc.scrollTop;
+  const dist = Math.abs(to - from);
+  if (reduced || dist < 2) { anim = null; sc.scrollTop = to; }
+  else anim = { from, to, t0: performance.now(), dur: clamp(300 + (dist / slot) * 160, 350, 900) };
+  autoPos = to;
 }
 function currentLocal() { const raw = pd * N; return raw - Math.min(N - 1, Math.floor(raw)); }
 
-$('prev').addEventListener('click', () => goTo(currentLocal() > 0.1 ? active : active - 1));
-$('next').addEventListener('click', () => goTo(active + 1));
+$('prev').addEventListener('click', () => {
+  const base = anim ? navGi : active;
+  goTo(!anim && currentLocal() > 0.1 ? base : base - 1);
+});
+$('next').addEventListener('click', () => goTo((anim ? navGi : active) + 1));
 
 function setPlaying(v: boolean) {
   playing = v;
   playIcon.innerHTML = v ? I_PAUSE : I_PLAY;
-  if (v) { if (sc.scrollTop >= scrollLen - 2) sc.scrollTo(0, 0); autoPos = sc.scrollTop; }
+  if (v) {
+    anim = null; liveIdx = -1;
+    if (sc.scrollTop >= scrollLen - 2) sc.scrollTop = 0;
+    autoPos = sc.scrollTop;
+  }
 }
 $('play').addEventListener('click', () => setPlaying(!playing));
 
 let dragging = false;
 function seekX(x: number) {
+  anim = null;
   const c = curCat;
   const r = laneEl.getBoundingClientRect();
   const t = clamp((x - r.left) / r.width, 0, 1) * catTotal[c];
@@ -340,14 +371,14 @@ render(0, false);
 requestAnimationFrame(loop);
 
 window.addEventListener('DOMContentLoaded', () => {
-    sc.focus();
+  sc.focus();
 });
 
 document.addEventListener('click', (e) => {
-    const target = e.target as Element | null;
+  const target = e.target as Element | null;
 
-    if (!target?.closest('button') && !target?.closest('input')) {
-        sc.focus();
-    }
+  if (!target?.closest('button') && !target?.closest('input')) {
+    sc.focus();
+  }
 });
 export {};

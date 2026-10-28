@@ -1,0 +1,736 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import backIcon from "../../assets/back.svg";
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+    "/src/assets/*.{png,jpg,jpeg,webp}",
+    { eager: true },
+);
+const getImg = (name: string) =>
+    images[`/src/assets/${name}`]?.default.src ?? "";
+
+interface Mockup {
+    src: string;
+    span?: "full" | "half" | "third" | "tall";
+    alt?: string;
+}
+interface Disenio {
+    title: string;
+    author: string;
+    desc: string;
+    img: string;
+    tags?: string[];
+    mockups?: Mockup[];
+}
+
+const disenios: Disenio[] = [
+    {
+        title: "Diseño 1",
+        author: "Autor 1",
+        desc: "Descripción 1",
+        img: getImg("1.png"),
+        tags: ["Cartel", "Branding"],
+        mockups: [],
+    },
+    {
+        title: "Diseño 2",
+        author: "Autor 2",
+        desc: "Descripción 2",
+        img: getImg("2.png"),
+    },
+    {
+        title: "Diseño 3",
+        author: "Autor 3",
+        desc: "Descripción 3",
+        img: getImg("3.jpg"),
+    },
+    {
+        title: "Diseño 4",
+        author: "Autor 4",
+        desc: "Descripción 4",
+        img: getImg("4.png"),
+    },
+    {
+        title: "Diseño 5",
+        author: "Autor 5",
+        desc: "Descripción 5",
+        img: getImg("5.png"),
+    },
+    {
+        title: "Diseño 6",
+        author: "Autor 6",
+        desc: "Descripción 6",
+        img: getImg("6.jpg"),
+    },
+    {
+        title: "Diseño 7",
+        author: "Autor 7",
+        desc: "Descripción 7",
+        img: getImg("6.jpg"),
+    },
+];
+const first = disenios[0];
+const total = String(disenios.length).padStart(2, "0");
+
+const data = JSON.stringify(
+    disenios.map((d) => ({
+        src: d.img,
+        title: d.title,
+        author: d.author,
+        desc: d.desc,
+        tags: d.tags ?? [],
+        mockups: d.mockups ?? [],
+    })),
+).replace(/</g, "\\u003c");
+---
+
+<Layout title="Diseños">
+    <div class="page">
+        <div
+            id="vcarrusel-container"
+            data-visible="7"
+            role="group"
+            aria-roledescription="carrusel"
+            aria-label="Diseños"
+            tabindex="0"
+        >
+            {
+                disenios.map((d, i) => (
+                    <div
+                        class="vcarrusel-item"
+                        role="group"
+                        aria-roledescription="diapositiva"
+                        aria-label={`${i + 1} de ${disenios.length}`}
+                        data-title={d.title}
+                        data-author={d.author}
+                        data-desc={d.desc}
+                    >
+                        {d.img && (
+                            <img
+                                src={d.img}
+                                alt={d.title}
+                                loading="eager"
+                                decoding="async"
+                                draggable="false"
+                            />
+                        )}
+                        <span class="shade" />
+                    </div>
+                ))
+            }
+        </div>
+
+        <section id="detail" class="detail" aria-live="polite">
+            <div class="detail-frame" title="Ver en pantalla completa">
+                {
+                    disenios.map((d, i) => (
+                        <div class={`detail-img${i === 0 ? " is-active" : ""}`}>
+                            {d.img && (
+                                <img
+                                    src={d.img}
+                                    alt={d.title}
+                                    loading="eager"
+                                    decoding="async"
+                                    draggable="false"
+                                />
+                            )}
+                        </div>
+                    ))
+                }
+            </div>
+            <div id="detail-info" class="detail-info">
+                <p id="detail-author" class="detail-author">{first.author}</p>
+                <div class="detail-main">
+                    <span id="detail-counter" class="detail-counter"
+                        >01 / {total}</span
+                    >
+                    <h2 id="detail-title" class="detail-title">
+                        {first.title}
+                    </h2>
+                    <p id="detail-desc" class="detail-desc">{first.desc}</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="nav">
+            <button
+                type="button"
+                id="v-up"
+                class="nav-btn up"
+                aria-label="Anterior"
+            >
+                <img src={backIcon.src} alt="" />
+            </button>
+            <button
+                type="button"
+                id="v-down"
+                class="nav-btn down"
+                aria-label="Siguiente"
+            >
+                <img src={backIcon.src} alt="" />
+            </button>
+        </div>
+    </div>
+
+    <article
+        class="case"
+        id="case"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Detalle del diseño"
+    >
+        <button
+            type="button"
+            class="case__close"
+            id="case-close"
+            aria-label="Cerrar">✕</button
+        >
+
+        <div class="case__scroll" id="case-scroll">
+            <header class="hero">
+                <div class="stage-wrap">
+                    <div class="case__stage" id="case-stage">
+                        <img id="case-img" alt="" draggable="false" />
+                    </div>
+                    <div class="zoom-ctrl">
+                        <button type="button" id="zoom-out" aria-label="Alejar"
+                            >−</button
+                        >
+                        <button
+                            type="button"
+                            id="zoom-reset"
+                            aria-label="Restablecer">⟲</button
+                        >
+                        <button type="button" id="zoom-in" aria-label="Acercar"
+                            >+</button
+                        >
+                    </div>
+                </div>
+                <div class="hero__text">
+                    <h2 id="case-title"></h2>
+                    <p id="case-author"></p>
+                    <p id="case-desc"></p>
+                    <ul id="case-tags"></ul>
+                </div>
+            </header>
+            <div class="grid" id="case-grid"></div>
+        </div>
+    </article>
+
+    <script
+        is:inline
+        type="application/json"
+        id="designs-data"
+        set:html={data}
+    />
+</Layout>
+
+<style>
+    .page {
+        --rw: 4;
+        --rh: 5;
+        --fh: min(62dvh, 660px);
+        --fw: min(36vw, 660px);
+        --card-w: clamp(80px, min(12vw, 14dvh), 170px);
+
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        color: #111;
+    }
+
+    #vcarrusel-container {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 01;
+        width: 15%;
+        touch-action: pan-x;
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+        z-index: 2;
+    }
+    #vcarrusel-container.dragging {
+        cursor: grabbing;
+    }
+
+    .vcarrusel-item {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--card-w);
+        aspect-ratio: var(--rw) / var(--rh);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #1a1a1a;
+        opacity: 0;
+        will-change: transform, opacity, filter;
+        backface-visibility: hidden;
+    }
+
+    .vcarrusel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none;
+    }
+    .vcarrusel-item.is-active {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        cursor: zoom-in;
+    }
+    .shade {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .detail {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .detail-frame {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        width: var(--fw);
+        height: var(--fh);
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .detail-img {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.18s ease-out;
+        will-change: opacity;
+        pointer-events: none;
+    }
+
+    .detail-img.is-active {
+        opacity: 1;
+    }
+
+    .detail-img.is-active img {
+        pointer-events: auto;
+    }
+
+    .detail-img img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        display: block;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        cursor: zoom-in;
+    }
+   
+    .detail-info {
+        position: absolute;
+        top: 50%;
+        translate: 0 -50%;
+        left: calc(50% + var(--fw) / 2 + 2rem);
+        right: 6rem;
+        max-width: 26rem;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-info.pop {
+        animation: pop 0.2s ease-out;
+    }
+    @keyframes pop {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    
+    .detail-main {
+        display: contents;
+    }
+    .detail-counter {
+        order: 1;
+        font-size: 0.85rem;
+        letter-spacing: 0.12em;
+        opacity: 0.7;
+    }
+    .detail-title {
+        order: 2;
+        margin: 0.4rem 0 0.2rem;
+        font-size: clamp(1.6rem, 3.2vw, 3rem);
+        font-weight: 800;
+        line-height: 1.05;
+    }
+    .detail-author {
+        order: 3;
+        margin: 0 0 1rem;
+        font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+        opacity: 0.8;
+    }
+    .detail-desc {
+        order: 4;
+        margin: 0;
+        font-size: clamp(0.85rem, 1.1vw, 1rem);
+        line-height: 1.55;
+        opacity: 0.9;
+    }
+
+    .nav {
+        position: absolute;
+        right: 2rem;
+        top: 50%;
+        translate: 0 -50%;
+        z-index: 10;
+        display: grid;
+        gap: 0.5rem;
+        background: rgb(27, 26, 26);
+        border-radius: 40px;
+        padding: 0.5rem;
+    }
+    .nav-btn {
+        display: grid;
+        place-items: center;
+        width: 3rem;
+        height: 3rem;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn img {
+        width: 1.4rem;
+        height: 1.4rem;
+        filter: invert(1);
+        opacity: 0.85;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .up img {
+        rotate: 90deg;
+    }
+    .down img {
+        rotate: -90deg;
+    }
+
+    .case {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: var(--white, #fff);
+        color: #111;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+    }
+    .case.is-open {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.4s ease;
+    }
+    .case__scroll {
+        position: absolute;
+        inset: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+    }
+    .case__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 50%;
+        font-size: 1rem;
+        cursor: pointer;
+        background: rgb(0 0 0 / 0.07);
+        transition: background 0.2s ease;
+    }
+    .case__close:hover {
+        background: rgb(0 0 0 / 0.14);
+    }
+
+    .hero {
+        
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 64px 24px 0px;
+        text-align: center;
+    }
+
+    .stage-wrap {
+        position: relative;
+        display: inline-block;
+    }
+
+    .case__stage {
+        display: block;
+        line-height: 0;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        touch-action: none;
+        cursor: zoom-in;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .case__stage.is-zoomed {
+        cursor: grab;
+    }
+    .case__stage.is-zoomed:active {
+        cursor: grabbing;
+    }
+    .case__stage img {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: min(92vw, 900px);
+        max-height: 68dvh;
+        transform-origin: center;
+        will-change: transform;
+        pointer-events: none;
+    }
+
+    .zoom-ctrl {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgb(27, 26, 26);
+    }
+    .zoom-ctrl button {
+        width: 2.2rem;
+        height: 2.2rem;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+    .zoom-ctrl button:hover {
+        background: rgb(255 255 255 / 0.15);
+    }
+
+    .hero__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        max-width: 52ch;
+    }
+    .hero__text h2 {
+        margin: 0;
+        font-size: clamp(1.6rem, 4vw, 3rem);
+        line-height: 1.05;
+    }
+    .hero__text p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.75;
+    }
+    .hero__text ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin: 4px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    .hero__text :global(li) {
+        padding: 3px 10px;
+        border: 1px solid rgb(0 0 0 / 0.18);
+        border-radius: 999px;
+        font-size: 0.7rem;
+        letter-spacing: 0.03em;
+    }
+
+    .stage-wrap,
+    .hero__text,
+    .grid {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .case.is-revealed .stage-wrap,
+    .case.is-revealed .hero__text,
+    .case.is-revealed .grid {
+        opacity: 1;
+        transform: none;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-flow: dense;
+        gap: 12px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 clamp(16px, 4vw, 56px) 96px;
+    }
+    .grid :global(.m) {
+        margin: 0;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #e8e6e1;
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.7s ease,
+            transform 0.7s cubic-bezier(0.22, 0.8, 0.2, 1);
+    }
+    .grid :global(.m.in) {
+        opacity: 1;
+        transform: none;
+    }
+    .grid :global(.m img) {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .grid :global(.m--full) {
+        grid-column: span 12;
+        aspect-ratio: 16 / 9;
+    }
+    .grid :global(.m--half) {
+        grid-column: span 6;
+        aspect-ratio: 4 / 3;
+    }
+    .grid :global(.m--third) {
+        grid-column: span 4;
+        aspect-ratio: 1;
+    }
+    .grid :global(.m--tall) {
+        grid-column: span 4;
+        aspect-ratio: 3 / 4;
+    }
+
+    @media (max-width: 1000px) {
+        #vcarrusel-container {
+            width: 30%;
+        }
+        .detail-info {
+            left: calc(50% + var(--fw) / 2 + 1.2rem);
+            right: 5.5rem;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page {
+            --card-w: clamp(100px, 36vw, 200px);
+        }
+        #vcarrusel-container {
+            left: 0;
+            right: 0;
+            width: auto;
+            bottom: 0;
+        }
+        .detail-frame {
+            display: none;
+        }
+
+        .detail-info {
+            display: contents;
+        }
+        .detail-info.pop > * {
+            animation: pop 0.2s ease-out;
+        }
+
+        .detail-author,
+        .detail-main {
+            position: absolute;
+            top: 50%;
+            translate: 0 -50%;
+            width: calc((100% - var(--card-w)) / 2 - 1rem);
+            margin: 0;
+            display: block;
+            pointer-events: none;
+        }
+        .detail-author {
+            left: -1.25rem;
+            text-align: right;
+        }
+        .detail-main {
+            right: -1.25rem;
+            text-align: left;
+        }
+
+        .detail-title {
+            font-size: clamp(1.1rem, 5vw, 1.5rem);
+        }
+        .detail-desc {
+            font-size: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .nav {
+            top: auto;
+            bottom: 1rem;
+            translate: none;
+            right: 0.5rem;
+            padding: 0.3rem;
+            gap: 0.25rem;
+        }
+        .nav-btn {
+            width: 2.4rem;
+            height: 2.4rem;
+        }
+        .grid :global(.m--half) {
+            grid-column: span 12;
+        }
+        .grid :global(.m--third),
+        .grid :global(.m--tall) {
+            grid-column: span 6;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .stage-wrap,
+        .hero__text,
+        .grid,
+        .grid :global(.m) {
+            transition: none;
+            transform: none;
+        }
+    }
+</style>
+
+<script>
+    import "../../js/carruselVertical";
+</script>

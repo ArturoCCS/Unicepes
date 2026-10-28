@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Card from "../components/Card.astro";
+import Credential from "../components/Credential.astro";
 
 import backIcon from "../assets/back.svg";
 
@@ -42,7 +42,7 @@ const alumnos = [
                             aria-label={`${i + 1} de ${alumnos.length}`}
                             data-color={alumno.color}
                         >
-                            <Card
+                            <Credential
                                 name={alumno.name}
                                 semester={alumno.semester}
                             />
