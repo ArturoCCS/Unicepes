@@ -1,0 +1,20 @@
+---
+import type { Rollo } from '../../data/rollos';
+interface Props { rollo: Rollo }
+const { rollo } = Astro.props;
+---
+<svg viewBox="0 0 120 190" style={`--c:${rollo.color}`} aria-hidden="true">
+  <rect x="50" y="0" width="20" height="14" rx="4" fill="#c4c4c4" />
+  <rect x="8" y="10" width="104" height="26" rx="9" fill="#c4c4c4" />
+  <rect x="14" y="30" width="92" height="130" fill="var(--foto-dk)" />
+  <rect x="14" y="62" width="92" height="74" fill="var(--c)" />
+  <rect x="14" y="30" width="16" height="130" fill="#fff" opacity=".1" />
+  <rect x="8" y="154" width="104" height="26" rx="9" fill="#c4c4c4" />
+  <text x="60" y="88" text-anchor="middle" font-size="10" letter-spacing="2" fill={rollo.textoColor} opacity=".7">ISO</text>
+  <text x="60" y="122" text-anchor="middle" font-size="36" font-weight="600" fill={rollo.textoColor}>{rollo.iso}</text>
+</svg>
+
+<style>
+  svg { display: block; width: 100%; height: 100%; }
+  text { font-family: var(--foto-texto); }
+</style>

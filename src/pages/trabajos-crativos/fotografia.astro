@@ -1,0 +1,89 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Camara from '../../components/fotografia/Camara.astro';
+import RolloCard from '../../components/fotografia/RolloCard.astro';
+import { rollos } from '../../data/rollos';
+import '../../styles/fotografia.css';
+---
+<Layout title="Fotografía" back="/">
+  <section class="portada">
+    <p class="sub">Elige un rollo para revelarlo.</p>
+    <div class="scene">
+      <span class="ghost" aria-hidden="true">Analógica</span>
+      <Camara />
+      {rollos.map((r) => <RolloCard rollo={r} />)}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .portada { 
+    height: 100%; 
+    min-height: 0; 
+    container-type: size; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 0 4vw 5vh; 
+  }
+  
+  .sub { 
+    margin: 0; 
+    color: var(--foto-mut); 
+    font: 300 15px var(--foto-texto); 
+    letter-spacing: .02em; 
+    text-align: center; 
+  }
+
+  .scene {
+    --cap: 58px;
+    position: relative; 
+    width: min(1200px, 100cqw, calc((100cqh - 120px) * 3.2)); 
+    margin-top: clamp(24px, 6vh, 64px);
+    display: grid; 
+    grid-template-columns: 2fr 1fr 1fr 1fr; 
+    gap: clamp(8px, 2.4vw, 40px); 
+    align-items: end;
+  }
+
+  .scene::before { 
+    content: ''; 
+    position: absolute; 
+    left: 0; 
+    right: 0; 
+    bottom: var(--cap); 
+    height: 1px; 
+    background: var(--foto-line); 
+  }
+
+  .scene > * { 
+    position: relative; 
+    z-index: 1; 
+  }
+
+  .scene > .ghost { 
+    position: absolute; 
+    z-index: 0; 
+    left: 50%; 
+    top: 36%; 
+    transform: translate(-50%, -50%); 
+    font: 700 clamp(90px, 19vw, 280px) / 1 var(--foto-texto); 
+    text-transform: uppercase; 
+    color: var(--foto-ghost); 
+    white-space: nowrap; 
+    pointer-events: none; 
+  }
+
+  @media (max-width: 700px) {
+    .scene { 
+      grid-template-columns: repeat(3, 1fr); 
+    }
+    .scene::before { 
+      display: none; 
+    }
+    .scene > .ghost { 
+      top: 30%; 
+    }
+  }
+</style>

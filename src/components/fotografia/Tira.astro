@@ -1,0 +1,256 @@
+---
+import Bote from "./Bote.astro";
+import { cantidad, fondo, type Rollo } from "../../data/rollos";
+interface Props {
+    rollo: Rollo;
+}
+const { rollo } = Astro.props;
+const n = cantidad(rollo);
+---
+
+<div class="tira">
+    <div class="sc" data-sc>
+        <div class="track">
+            <div class="gcan" style={`view-transition-name:can-${rollo.id}`}>
+                <Bote rollo={rollo} />
+            </div>
+            <div class="pull">
+                <div class="strip">
+                    {
+                        Array.from({ length: n }, (_, i) => (
+                            <button
+                                type="button"
+                                class="frame"
+                                data-frame
+                                data-i={i}
+                                aria-label={`${rollo.nombre} ${i + 1}`}
+                                style={`--img:${fondo(rollo, i)}`}
+                            >
+                                <span class="photo" />
+                            </button>
+                        ))
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hint" data-hint>
+        <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg
+        >
+        Desliza para avanzar
+    </div>
+    <div class="prog"><i data-prog></i></div>
+</div>
+
+<style>
+    .tira {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+    }
+    .sc {
+        position: absolute;
+        inset: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        display: flex;
+        align-items: center;
+        padding: 0 clamp(24px, 8vw, 120px);
+        scrollbar-width: none;
+    }
+    .sc::-webkit-scrollbar {
+        display: none;
+    }
+    .track {
+        --S: clamp(120px, min(30cqh, 44cqw), 270px);
+        --H: calc(var(--S) * 2.05);
+        display: flex;
+        align-items: center;
+        width: max-content;
+        padding-right: 2vw;
+    }
+    .gcan {
+        flex: none;
+        position: relative;
+        z-index: 2;
+        height: var(--H);
+        width: calc(var(--H) * 0.6316);
+        filter: drop-shadow(0 18px 16px rgba(0, 0, 0, 0.16));
+    }
+    .pull {
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        margin-left: calc(var(--H) * -0.09);
+    }
+    .strip {
+        display: flex;
+        gap: calc(var(--S) * 0.04);
+        height: var(--S);
+        width: max-content;
+        position: relative;
+        background: var(--foto-film);
+        padding: calc(var(--S) * 0.15) calc(var(--S) * 0.06)
+            calc(var(--S) * 0.15) calc(var(--H) * 0.09 + var(--S) * 0.06);
+        animation: salir 2.4s cubic-bezier(0.3, 0.7, 0.2, 1) 0.9s both;
+    }
+    @keyframes salir {
+        from {
+            transform: translateX(-101%);
+        }
+    }
+    .strip::before,
+    .strip::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: calc(var(--S) * 0.05);
+        background: repeating-linear-gradient(
+            90deg,
+            transparent 0 calc(var(--S) * 0.02),
+            var(--foto-bg) calc(var(--S) * 0.02) calc(var(--S) * 0.065),
+            transparent calc(var(--S) * 0.065) calc(var(--S) * 0.085)
+        );
+    }
+    .strip::before {
+        top: calc(var(--S) * 0.05);
+    }
+    .strip::after {
+        bottom: calc(var(--S) * 0.05);
+    }
+
+    .frame {
+        display: block;
+        flex: none;
+        height: 100%;
+        aspect-ratio: 3 / 2;
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+        border: 0;
+        border-radius: 3px;
+        background: #0b0b0b;
+        cursor: pointer;
+    }
+    .frame:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: -4px;
+    }
+    .photo {
+        position: absolute;
+        inset: 0;
+        background-image: var(--img);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #0b0b0b;
+        transform: scale(
+            1.05
+        );
+        filter: invert(1) grayscale(1) brightness(0.4) contrast(1.3) blur(7px);
+        transition:
+            filter 2.6s ease-out,
+            transform 2.6s ease-out;
+    }
+    .frame.dev .photo {
+        filter: none;
+        transform: none;
+    }
+    .frame.dev:hover .photo {
+        transform: scale(1.02);
+        transition-duration: 0.8s;
+    }
+
+    .hint {
+        position: absolute;
+        right: clamp(18px, 3vw, 44px);
+        bottom: clamp(54px, 9vh, 84px);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 9px 16px 9px 14px;
+        background: var(--foto-bg);
+        border: 1px solid var(--foto-line);
+        border-radius: 99px;
+        font: 300 13px var(--foto-texto);
+        box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.25);
+        pointer-events: none;
+        transition: opacity 0.6s;
+        animation: aparece 0.8s 3.2s both;
+    }
+    .prog {
+        position: absolute;
+        left: clamp(24px, 8vw, 120px);
+        right: clamp(24px, 8vw, 120px);
+        bottom: clamp(24px, 4.5vh, 40px);
+        height: 2px;
+        background: var(--foto-line);
+    }
+    .prog i {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--foto-ink);
+    }
+    @keyframes aparece {
+        from {
+            opacity: 0;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .strip,
+        .hint {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    const sc = document.querySelector<HTMLElement>("[data-sc]")!;
+    const prog = document.querySelector<HTMLElement>("[data-prog]")!;
+    const hint = document.querySelector<HTMLElement>("[data-hint]")!;
+    const frames = [...document.querySelectorAll<HTMLElement>("[data-frame]")];
+
+    const obs = new IntersectionObserver(
+        (es) => {
+            es.forEach((e) => {
+                if (!e.isIntersecting) return;
+                const f = e.target as HTMLElement;
+                setTimeout(
+                    () => f.classList.add("dev"),
+                    350 + (Number(f.dataset.i) % 4) * 120,
+                );
+                obs.unobserve(f);
+            });
+        },
+        { root: sc, threshold: 0.6 },
+    );
+    frames.forEach((f) => obs.observe(f));
+
+    sc.addEventListener(
+        "wheel",
+        (e) => {
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                e.preventDefault();
+                sc.scrollLeft += e.deltaY;
+            }
+        },
+        { passive: false },
+    );
+
+    sc.addEventListener("scroll", () => {
+        prog.style.width =
+            (sc.scrollLeft / (sc.scrollWidth - sc.clientWidth || 1)) * 100 +
+            "%";
+        if (sc.scrollLeft > 40) hint.style.opacity = "0";
+    });
+</script>

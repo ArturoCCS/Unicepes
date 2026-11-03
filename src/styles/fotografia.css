@@ -1,0 +1,18 @@
+
+:root {
+  --foto-bg: #fff;
+  --foto-ink: #0c0c0c;
+  --foto-mut: #8b8b8b;
+  --foto-line: #e8e8e8;
+  --foto-ghost: #f0f0f0;
+  --foto-dk: #151515;
+  --foto-dk2: #2d2d2d;
+  --foto-film: #151515;
+  --foto-display: 'Syne', 'Arial Black', sans-serif;
+  --foto-texto: 'Oswald', 'Arial Narrow', sans-serif;
+}
+
+@view-transition { navigation: auto; }
+::view-transition-group(*) { animation-duration: .9s; animation-timing-function: cubic-bezier(.6, 0, .2, 1); }
+::view-transition-group(root) { animation-duration: .5s; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*) { animation-duration: .01s; } }
