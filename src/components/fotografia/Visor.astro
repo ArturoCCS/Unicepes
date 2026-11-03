@@ -1,0 +1,212 @@
+---
+import type { Rollo } from "../../data/rollos";
+interface Props {
+    rollo: Rollo;
+}
+const { rollo } = Astro.props;
+---
+
+<dialog id="visor" aria-label={`Fotografías de ${rollo.nombre}`}>
+    <button type="button" class="ico" data-cerrar aria-label="Cerrar">
+        <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg
+        >
+    </button>
+    <div class="card"><div class="big" data-img></div></div>
+    <div class="meta"><b>{rollo.nombre}</b><span data-n></span></div>
+    <div class="pill">
+        <button type="button" data-prev aria-label="Anterior"
+            ><svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg
+            ></button
+        >
+        <button type="button" data-next aria-label="Siguiente"
+            ><svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg
+            ></button
+        >
+    </div>
+</dialog>
+
+<style>
+    dialog {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        background: var(--foto-bg);
+        color: var(--foto-ink);
+    }
+    dialog[open] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: abrir 0.35s ease both;
+    }
+    @keyframes abrir {
+        from {
+            opacity: 0;
+        }
+    }
+    .card {
+        padding: clamp(8px, 1.4vw, 18px);
+        background: var(--foto-bg);
+        border-radius: 18px;
+        box-shadow:
+            0 30px 70px -26px rgba(0, 0, 0, 0.35),
+            0 0 0 1px var(--foto-line);
+    }
+    .big {
+        width: min(88vw, calc((100svh - 260px) * 1.5), 980px);
+        aspect-ratio: 3 / 2;
+        border-radius: 10px;
+        background-image: var(--img);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #0b0b0b;
+        transition: opacity 0.2s;
+    }
+    .meta {
+        margin-top: 24px;
+        text-align: center;
+    }
+    .meta b {
+        display: block;
+        font: 800 clamp(22px, 3vw, 34px) / 1.1 var(--foto-display);
+        letter-spacing: -0.02em;
+    }
+    .meta span {
+        color: var(--foto-mut);
+        font: 300 14px var(--foto-texto);
+    }
+    .ico {
+        position: absolute;
+        top: clamp(14px, 3vh, 26px);
+        right: clamp(18px, 3vw, 44px);
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .ico:hover {
+        background: #f5f5f5;
+    }
+    .pill {
+        position: absolute;
+        bottom: clamp(18px, 4vh, 40px);
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        padding: 6px;
+        background: #151515;
+        color: #fff;
+        border-radius: 99px;
+    }
+    .pill button {
+        width: 58px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 99px;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .pill button:hover {
+        background: #2d2d2d;
+    }
+    .pill button:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: -3px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        dialog[open] {
+            animation: none;
+        }
+        .big {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    const dlg = document.querySelector<HTMLDialogElement>("#visor")!;
+    const img = dlg.querySelector<HTMLElement>("[data-img]")!;
+    const num = dlg.querySelector<HTMLElement>("[data-n]")!;
+    const frames = [...document.querySelectorAll<HTMLElement>("[data-frame]")];
+    const pad = (n: number) => String(n).padStart(2, "0");
+    let i = 0;
+
+    function show(n: number, first = false) {
+        i = (n + frames.length) % frames.length;
+        const set = () => {
+            img.style.setProperty(
+                "--img",
+                frames[i].style.getPropertyValue("--img"),
+            );
+            img.style.opacity = "1";
+        };
+        if (first) set();
+        else {
+            img.style.opacity = "0";
+            setTimeout(set, 180);
+        }
+        num.textContent = `${pad(i + 1)} / ${pad(frames.length)}`;
+    }
+
+    frames.forEach((f, k) =>
+        f.addEventListener("click", () => {
+            show(k, true);
+            dlg.showModal();
+        }),
+    );
+    dlg.querySelector("[data-prev]")!.addEventListener("click", () =>
+        show(i - 1),
+    );
+    dlg.querySelector("[data-next]")!.addEventListener("click", () =>
+        show(i + 1),
+    );
+    dlg.querySelector("[data-cerrar]")!.addEventListener("click", () =>
+        dlg.close(),
+    );
+    dlg.addEventListener("click", (e) => {
+        if (e.target === dlg) dlg.close();
+    });
+    dlg.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") show(i - 1);
+        if (e.key === "ArrowRight") show(i + 1);
+    });
+</script>

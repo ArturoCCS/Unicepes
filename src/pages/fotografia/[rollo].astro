@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Tira from '../../components/fotografia/Tira.astro';
+import Visor from '../../components/fotografia/Visor.astro';
+import { rollos, cantidad } from '../../data/rollos';
+import '../../styles/fotografia.css';
+
+export function getStaticPaths() {
+  return rollos.map((rollo) => ({ params: { rollo: rollo.id }, props: { rollo } }));
+}
+const { rollo } = Astro.props;
+---
+<Layout title={rollo.nombre} back="/fotografia">
+  <section class="galeria">
+    <p class="sub">{rollo.texto} · {cantidad(rollo)} fotografías</p>
+    <Tira rollo={rollo} />
+    <Visor rollo={rollo} />
+  </section>
+</Layout>
+
+<style>
+  .galeria { height: 100%; min-height: 0; container-type: size; display: flex; flex-direction: column; }
+  .sub { margin: 0; text-align: center; color: var(--foto-mut); font: 300 15px var(--foto-texto); letter-spacing: .02em; }
+</style>

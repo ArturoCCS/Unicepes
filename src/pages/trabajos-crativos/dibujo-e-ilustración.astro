@@ -1,0 +1,482 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { salas } from "../../data/salas";
+
+const items = Object.values(salas);
+const SLIDES = 5;
+const PEEK = 4;
+---
+
+<Layout title="Galería" showTitle={false}>
+
+
+  <main class="split-gallery" aria-label="Selección de sala">
+    {
+      items.map((sala, index) => {
+        const obras = sala.obras ?? [];
+        const slides = obras.slice(0, SLIDES);
+        const peek = obras.slice(0, PEEK);
+        const extra = obras.length - peek.length;
+        return (
+          <section class="portal-pane" data-index={index}>
+            <div class="backdrop" aria-hidden="true">
+              {slides.map((o, i) => (
+                <img
+                  class:list={["slide", { on: i === 0 }]}
+                  src={o.src}
+                  alt=""
+                  data-title={o.title}
+                  data-meta={o.meta}
+                  loading={index === 0 && i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  onerror="this.classList.add('bad')"
+                />
+              ))}
+              <div class="veil" />
+            </div>
+
+            <a class="pane-link" href={`/sala/${sala.slug}`} aria-label={`Entrar a ${sala.nombre}`} />
+
+            <div class="pane-content">
+              <header>
+                <h2 class="room-title">{sala.nombre}</h2>
+                <p class="room-desc">{sala.desc}</p>
+              </header>
+
+              {peek.length > 0 && (
+                <div class="spoiler">
+                  <p class="spoiler-label">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    Adelanto de la sala
+                  </p>
+                  <ul class="peek">
+                    {peek.map((o, i) => (
+                      <li class:list={{ on: i === 0 }} style={`--i:${i}`}>
+                        <img src={o.src} alt="" loading="lazy" decoding="async" onerror="this.classList.add('bad')" />
+                        {extra > 0 && i === peek.length - 1 && <span class="more">+{extra}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="now">
+                    <span class="now-t">{slides[0]?.title}</span>
+                    <span class="now-m">{slides[0]?.meta}</span>
+                  </p>
+                </div>
+              )}
+
+              <footer class="pane-footer">
+                <p class="count">{obras.length} obras en recorrido 3D</p>
+                <span class="enter-btn" aria-hidden="true">Entrar a la sala</span>
+              </footer>
+            </div>
+          </section>
+        );
+      })
+    }
+    <p class="hint">Pasa el cursor sobre una sala para ver un adelanto</p>
+  </main>
+</Layout>
+
+<script>
+  const init = () => {
+    const root = document.querySelector<HTMLElement>(".split-gallery");
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = "1";
+
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const touchy = () => matchMedia("(max-width: 768px), (hover: none)").matches;
+
+    root.querySelectorAll<HTMLElement>(".portal-pane").forEach((pane) => {
+      const slides = [...pane.querySelectorAll<HTMLElement>(".slide")];
+      const thumbs = [...pane.querySelectorAll<HTMLElement>(".peek li")];
+      const nowT = pane.querySelector<HTMLElement>(".now-t");
+      const nowM = pane.querySelector<HTMLElement>(".now-m");
+      const bd = pane.querySelector<HTMLElement>(".backdrop")!;
+      let i = 0, timer = 0;
+
+      const show = (n: number) => {
+        if (!slides.length) return;
+        i = (n + slides.length) % slides.length;
+        for (let g = 0; g < slides.length && slides[i].classList.contains("bad"); g++) i = (i + 1) % slides.length;
+        slides.forEach((s, k) => s.classList.toggle("on", k === i));
+        thumbs.forEach((t, k) => t.classList.toggle("on", k === i));
+        if (nowT) nowT.textContent = slides[i].dataset.title ?? "";
+        if (nowM) nowM.textContent = slides[i].dataset.meta ?? "";
+      };
+      const start = () => {
+        pane.classList.add("live");
+        if (reduce || slides.length < 2 || timer) return;
+        timer = window.setInterval(() => show(i + 1), 2200);
+      };
+      const stop = () => {
+        pane.classList.remove("live");
+        clearInterval(timer);
+        timer = 0;
+        show(0);
+        bd.style.setProperty("--tx", "0px");
+        bd.style.setProperty("--ty", "0px");
+      };
+
+      pane.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && start());
+      pane.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && stop());
+      pane.addEventListener("focusin", start);
+      pane.addEventListener("focusout", stop);
+      pane.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse" || reduce) return;
+        const r = pane.getBoundingClientRect();
+        bd.style.setProperty("--tx", `${((e.clientX - r.left) / r.width - 0.5) * -22}px`);
+        bd.style.setProperty("--ty", `${((e.clientY - r.top) / r.height - 0.5) * -14}px`);
+      });
+
+      new IntersectionObserver(
+        (es) => es.forEach((en) => touchy() && (en.isIntersecting ? start() : stop())),
+        { threshold: 0.6 }
+      ).observe(pane);
+    });
+  };
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>
+
+<style is:global>
+
+  .split-gallery {
+    color-scheme: light dark;
+    --bg: light-dark(#e9e7e2, #e9e7e2);
+    --paper: light-dark(#f2efe9, #f2efe9);
+    --ink: light-dark(#1d1a16, #1d1a16);
+    --ink-soft: light-dark(rgba(29, 26, 22, 0.74), rgba(29, 26, 22, 0.74));
+    --line: light-dark(rgba(29, 26, 22, 0.18), rgba(29, 26, 22, 0.18));
+    --glass: light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55));
+    --amber: light-dark(#a8650f, #a8650f);
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  html.light .split-gallery,
+  html[data-theme="light"] .split-gallery {
+    color-scheme: light;
+  }
+  html.dark .split-gallery,
+  html[data-theme="dark"] .split-gallery {
+    color-scheme: dark;
+  }
+
+  @media (min-width: 769px) {
+    html:has(.split-gallery),
+    body:has(.split-gallery) {
+      overflow: hidden;
+    }
+  }
+
+  .split-gallery {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "DM Sans", system-ui, sans-serif;
+  }
+
+  .portal-pane {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+    transition: flex 0.7s var(--ease);
+  }
+  .portal-pane:last-of-type {
+    border-right: 0;
+  }
+
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    --tx: 0px;
+    --ty: 0px;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    filter: blur(18px) saturate(0.6);
+    transform: scale(1.1) translate(var(--tx), var(--ty));
+    transition:
+      opacity 1s ease,
+      filter 0.9s var(--ease),
+      transform 0.6s ease-out;
+  }
+  .slide.on {
+    opacity: 1;
+  }
+  .slide.bad,
+  .peek img.bad {
+    display: none;
+  }
+  .live .slide {
+    filter: blur(0) saturate(1.05);
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, var(--paper) 0%, color-mix(in srgb, var(--paper) 80%, transparent) 42%, transparent 80%),
+      linear-gradient(to bottom, color-mix(in srgb, var(--paper) 65%, transparent), transparent 38%);
+  }
+  .veil::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--paper);
+    opacity: 0.5;
+    transition: opacity 0.7s var(--ease);
+  }
+  .live .veil::after {
+    opacity: 0.08;
+  }
+
+  .pane-link {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+  }
+  .pane-link:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: -6px;
+  }
+
+  .pane-content {
+    position: relative;
+    z-index: 3;
+    box-sizing: border-box;
+    width: min(100%, 460px);
+    height: min(80%, 660px);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    pointer-events: none;
+  }
+
+  .room-title {
+    margin: 0;
+    font: italic 400 clamp(38px, 4.4vw, 64px) / 1.04 "Bodoni Moda", Georgia, serif;
+    letter-spacing: -0.015em;
+    text-shadow: 0 0 28px var(--paper);
+  }
+  .room-desc {
+    margin: 14px 0 0;
+    max-width: 38ch;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    text-shadow: 0 0 18px var(--paper);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .spoiler-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--amber);
+  }
+  .spoiler-label svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .peek {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .peek li {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--glass);
+    opacity: 0.8;
+    transition:
+      opacity 0.4s,
+      border-color 0.4s;
+  }
+  .peek li.on {
+    opacity: 1;
+    border-color: var(--amber);
+  }
+  .peek img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: blur(10px) saturate(0.5);
+    transform: scale(1.2);
+    transition:
+      filter 0.7s ease calc(var(--i) * 90ms),
+      transform 0.7s ease calc(var(--i) * 90ms);
+  }
+  .live .peek img {
+    filter: none;
+    transform: scale(1);
+  }
+  .more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--paper) 60%, transparent);
+  }
+  .now {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 2.9em;
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .now-t {
+    font: italic 400 17px / 1.2 "Bodoni Moda", Georgia, serif;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .now-m {
+    opacity: 0;
+    transition: opacity 0.5s 0.1s;
+  }
+  .live .now-t,
+  .live .now-m {
+    opacity: 1;
+  }
+
+  .count {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .enter-btn {
+    display: inline-block;
+    padding: 13px 26px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 40px;
+    background: var(--glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+      background 0.4s var(--ease),
+      color 0.4s var(--ease),
+      border-color 0.4s var(--ease);
+  }
+  .live .enter-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    z-index: 5;
+    margin: 0;
+    padding: 8px 16px;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.4s;
+  }
+  .split-gallery:has(.live) .hint {
+    opacity: 0;
+  }
+  @media (hover: none), (max-width: 768px) {
+    .hint {
+      display: none;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .split-gallery:has(.portal-pane.live) .portal-pane:not(.live) {
+      flex: 0.75;
+    }
+    .split-gallery:has(.portal-pane.live) .portal-pane:not(.live) .veil::after {
+      opacity: 0.82;
+    }
+    .split-gallery .portal-pane.live {
+      flex: 1.3;
+    }
+  }
+  @media (max-width: 768px) {
+    .split-gallery {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+    .portal-pane {
+      flex: none;
+      min-height: min(82svh, 560px);
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .pane-content {
+      height: auto;
+      min-height: min(82svh, 560px);
+      padding: 28px 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portal-pane,
+    .slide,
+    .peek img,
+    .veil::after {
+      transition-duration: 0.01ms;
+    }
+  }
+</style>
