@@ -150,13 +150,15 @@ const stickers: StickerData[] = [
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: clamp(4rem, 20vw, 16rem);
+        font-size: clamp(2.5rem, 12vw, 16rem);
         font-weight: 900;
-        color: rgba(74, 66, 66, 0.114);
+        color: rgba(74, 66, 66, 0.08);
         text-transform: uppercase;
         user-select: none;
         pointer-events: none;
-        white-space: nowrap;
+        text-align: center;
+        width: 90%;
+        line-height: 0.95;
         z-index: 1;
     }
 
@@ -168,12 +170,11 @@ const stickers: StickerData[] = [
         }
         #sticker-container {
             position: relative;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 2.5rem 1rem;
-            padding: 5rem 1.5rem 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 6rem 1.5rem 4rem 1.5rem;
             inset: auto;
-            justify-items: center;
             align-items: center;
         }
         .sticker-item {
@@ -185,7 +186,6 @@ const stickers: StickerData[] = [
             display: flex;
             justify-content: center;
         }
-        /* Aseguramos que el contenido interno del sticker se ajuste a la celda móvil */
         .sticker-item :global(a), 
         .sticker-item :global(.sticker) {
             max-width: 100%;
@@ -193,6 +193,10 @@ const stickers: StickerData[] = [
         }
         .sticker-item:hover {
             transform: rotate(0deg) scale(1.05) !important;
+        }
+        .bg-watermark {
+            font-size: clamp(2.8rem, 14vw, 4.5rem);
+            white-space: normal;
         }
     }
 </style>

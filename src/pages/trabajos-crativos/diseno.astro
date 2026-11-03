@@ -245,7 +245,7 @@ const data = JSON.stringify(
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 01;
+        left: 0;
         width: 15%;
         touch-action: pan-x;
         cursor: grab;
@@ -476,7 +476,6 @@ const data = JSON.stringify(
     }
 
     .hero {
-        
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -674,27 +673,31 @@ const data = JSON.stringify(
             position: absolute;
             top: 50%;
             translate: 0 -50%;
-            width: calc((100% - var(--card-w)) / 2 - 1rem);
             margin: 0;
             display: block;
             pointer-events: none;
+            box-sizing: border-box;
+            width: auto;
         }
         .detail-author {
-            left: -1.25rem;
+            left: 0.75rem;
+            right: calc(50% + var(--card-w) / 2 + 2rem);
             text-align: right;
         }
         .detail-main {
-            right: -1.25rem;
+            left: calc(50% + var(--card-w) / 2 + 2rem);
+            right: 0.75rem;
             text-align: left;
         }
 
         .detail-title {
-            font-size: clamp(1.1rem, 5vw, 1.5rem);
+            font-size: clamp(1rem, 4.2vw, 1.35rem);
+            word-break: break-word;
         }
         .detail-desc {
             font-size: 0.75rem;
             display: -webkit-box;
-            -webkit-line-clamp: 5;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
