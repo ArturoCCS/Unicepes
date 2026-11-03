@@ -3,11 +3,11 @@ import Layout from "../../layouts/Layout.astro";
 import backIcon from "../../assets/back.svg";
 
 const images = import.meta.glob<{ default: ImageMetadata }>(
-    "/src/assets/*.{png,jpg,jpeg,webp}",
+    "/src/assets/diseno/*.{png,jpg,jpeg,webp}",
     { eager: true },
 );
 const getImg = (name: string) =>
-    images[`/src/assets/${name}`]?.default.src ?? "";
+    images[`/src/assets/diseno/${name}`]?.default.src ?? "";
 
 interface Mockup {
     src: string;
@@ -66,7 +66,7 @@ const disenios: Disenio[] = [
         title: "Diseño 7",
         author: "Autor 7",
         desc: "Descripción 7",
-        img: getImg("6.jpg"),
+        img: getImg("7.png"),
     },
 ];
 const first = disenios[0];
