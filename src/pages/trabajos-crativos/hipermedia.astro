@@ -174,7 +174,8 @@ import Layout from "../../layouts/Layout.astro";
         position: sticky;
         top: 0;
         height: 100%;
-        margin: 0 100px;
+        /* Corrección: Margen fluido usando clamp para pantallas grandes y medianas */
+        margin: 0 clamp(16px, 6vw, 100px);
         padding: 6px 20px 18px;
         display: flex;
         flex-direction: column;
@@ -746,6 +747,8 @@ import Layout from "../../layouts/Layout.astro";
 
     @media (max-width: 720px) {
         .hm .pin {
+            /* Corrección: Margen lateral más estrecho y seguro para móviles */
+            margin: 0 8px;
             padding: 6px 12px 14px;
             gap: 10px;
         }
