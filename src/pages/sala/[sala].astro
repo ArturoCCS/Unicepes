@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Gallery3D from '../../components/Gallery3D.astro';
+import { salas } from '../../data/salas';
+
+export function getStaticPaths() {
+  return Object.keys(salas).map((sala) => ({ params: { sala } }));
+}
+
+const { sala } = Astro.params;
+const s = salas[sala as keyof typeof salas];
+---
+
+<Layout title={`${s.nombre} | Galería`} back="/trabajos-crativos/dibujo-e-ilustracion" showTitle={false}>
+  <Gallery3D slug={sala as keyof typeof salas} />
+</Layout>

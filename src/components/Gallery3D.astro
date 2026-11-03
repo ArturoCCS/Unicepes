@@ -1,0 +1,65 @@
+---
+import '../styles/gallery.css';
+import { salas } from '../data/salas';
+const { slug } = Astro.props;
+const s = salas[slug as keyof typeof salas];
+---
+
+<div class="gal" id="gal" data-sala={JSON.stringify(s)}>
+  <canvas class="cv"></canvas>
+  <canvas class="map gl" id="map"></canvas>
+
+  <div class="card gl" id="card">
+    <div class="ct"><small id="cn"></small><b id="pt"></b><span id="pm"></span></div>
+    <div class="ca">
+      <button class="ib" id="pp" aria-label="Obra anterior"><svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+      <button class="main" id="pv">Ver en grande</button>
+      <button class="ib" id="pn" aria-label="Obra siguiente"><svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <div class="stick gl" id="stick"><i></i></div>
+
+  <nav class="dock gl" aria-label="Controles de la sala">
+    <button id="bo" aria-expanded="false" aria-label="Ver todas las obras" title="Obras"><svg class="ic" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
+    <button id="bm" aria-label="Mostrar mapa" title="Mapa"><svg class="ic" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></svg></button>
+    <button id="tm" aria-label="Cambiar entre día y noche" title="Día y noche">
+      <svg class="ic ic-moon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>
+      <svg class="ic ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></svg>
+    </button>
+    <button id="bf" aria-label="Pantalla completa" title="Pantalla completa"><svg class="ic" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </nav>
+
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="drawer gl" id="drawer" aria-label="Obras de la sala">
+    <header><b>{s.nombre}</b><button class="ib" id="dx" aria-label="Cerrar"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div id="dl"></div>
+  </aside>
+
+  <div class="lb" id="lb">
+    <div class="lbt"><span id="lbc"></span><button id="lbx">Volver a la sala</button></div>
+    <img id="lbi" alt="" />
+    <button class="ib lbn l" id="lbp" aria-label="Anterior"><svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+    <button class="ib lbn r" id="lbn" aria-label="Siguiente"><svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+  </div>
+
+  <div class="intro" id="intro">
+    <div class="box">
+      <h2>{s.nombre}</h2>
+      <p>{s.desc}</p>
+      <ul id="how"></ul>
+      <button class="main" id="gob" disabled>Preparando la sala… 0%</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const root = document.getElementById('gal')!;
+  import('../js/gallery/main')
+    .then((m) => m.createGallery(root))
+    .catch(() => {
+      const b = root.querySelector<HTMLButtonElement>('#gob');
+      if (b) b.textContent = 'Tu dispositivo no puede mostrar la sala 3D';
+    });
+</script>

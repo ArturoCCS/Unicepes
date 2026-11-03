@@ -1,0 +1,665 @@
+.gal {
+  --ui: rgba(255, 255, 255, 0.74);
+  --bd: rgba(255, 255, 255, 0.6);
+  --fg: #1d1a16;
+  --bgs: #fff;
+  --gap: max(16px, env(safe-area-inset-bottom));
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #0b0d14;
+  touch-action: none;
+  color: var(--fg);
+  font: 400 14px 'DM Sans', system-ui, sans-serif;
+}
+
+html.dark .gal,
+html[data-theme='dark'] .gal {
+  --ui: rgba(18, 20, 28, 0.68);
+  --bd: rgba(255, 255, 255, 0.13);
+  --fg: #f2ebdc;
+  --bgs: #14161c;
+}
+
+.gal .cv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.gal .cv:active {
+  cursor: grabbing;
+}
+
+.gal .gl {
+  background: var(--ui);
+  border: 1px solid var(--bd);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+}
+
+.gal button {
+  font: 500 13px 'DM Sans', system-ui, sans-serif;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 99px;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  transition: background 0.2s;
+}
+
+.gal button:hover {
+  background: rgba(128, 128, 128, 0.2);
+}
+
+.gal button:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.gal .ic {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gal .ic-sun {
+  display: none;
+}
+
+html.dark .gal .ic-sun,
+html[data-theme='dark'] .gal .ic-sun {
+  display: block;
+}
+
+html.dark .gal .ic-moon,
+html[data-theme='dark'] .gal .ic-moon {
+  display: none;
+}
+
+.gal .ib {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.gal .main {
+  height: 40px;
+  padding: 0 18px;
+  background: var(--fg);
+  color: var(--bgs);
+}
+
+.gal .main:hover {
+  background: var(--fg);
+  opacity: 0.85;
+}
+
+.gal .main:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.gal .dock {
+  position: absolute;
+  left: 50%;
+  bottom: var(--gap);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 99px;
+  z-index: 2;
+}
+
+.gal .dock button {
+  width: 44px;
+  height: 44px;
+}
+
+.gal .card {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--gap) + 66px);
+  width: min(440px, calc(100% - 24px));
+  transform: translate(-50%, 12px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px 14px 20px;
+  border-radius: 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.35s;
+  z-index: 2;
+}
+
+.gal .card.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.gal .ct {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.gal .ct small {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.gal .ct b {
+  font: italic 500 22px / 1.15 'Bodoni Moda', Georgia, serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gal .ct span {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.gal .ca {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.gal .ca .ib {
+  border: 1px solid var(--bd);
+}
+
+.gal .map {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 8px;
+  border-radius: 16px;
+  max-height: 44vh;
+  width: auto;
+  height: auto;
+  display: none;
+  z-index: 1;
+}
+
+.gal .map.on {
+  display: block;
+}
+
+.gal .stick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 1;
+}
+
+.gal .stick.on {
+  opacity: 1;
+}
+
+.gal .stick i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px;
+  border-radius: 50%;
+  background: var(--fg);
+  opacity: 0.7;
+  transform: translate(var(--x, 0px), var(--y, 0px));
+}
+
+@media (pointer: coarse) {
+  .gal .stick {
+    display: block;
+  }
+
+  .gal .card {
+    bottom: auto;
+    top: max(12px, env(safe-area-inset-top));
+    transform: translate(-50%, -12px);
+  }
+
+  .gal .card.on {
+    transform: translate(-50%, 0);
+  }
+
+  .gal .map {
+    top: auto;
+    bottom: calc(var(--gap) + 66px);
+  }
+}
+
+.gal .drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 92%);
+  padding: 16px;
+  overflow: auto;
+  touch-action: pan-y;
+  border-radius: 24px 0 0 24px;
+  transform: translateX(105%);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  z-index: 3;
+}
+
+.gal .drawer.on {
+  transform: none;
+}
+
+.gal .drawer header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.gal .drawer header b {
+  font: italic 500 26px 'Bodoni Moda', Georgia, serif;
+}
+
+.gal #dl {
+  display: grid;
+  gap: 6px;
+}
+
+.gal #dl button {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 12px;
+  align-items: center;
+  justify-items: start;
+  text-align: left;
+  padding: 6px;
+  border-radius: 14px;
+  width: 100%;
+}
+
+.gal #dl img {
+  width: 84px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.gal #dl span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gal #dl small {
+  opacity: 0.65;
+}
+
+.gal .lb {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 7, 6, 0.95);
+  overflow: hidden;
+  color: #f2ebdc;
+}
+
+.gal .lb.on {
+  display: flex;
+}
+
+.gal .lbt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  font: italic 500 18px 'Bodoni Moda', Georgia, serif;
+}
+
+.gal .lbt button {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex: none;
+}
+
+.gal .lb img {
+  max-width: 92%;
+  max-height: 80%;
+  cursor: zoom-in;
+  box-shadow: 0 30px 80px #000a;
+  touch-action: none;
+  will-change: transform;
+}
+
+.gal .lb img.zoom {
+  cursor: grab;
+}
+
+.gal .lb img.snap {
+  transition: transform 0.22s ease;
+}
+
+.gal .lbn {
+  position: absolute;
+  top: 50%;
+  margin-top: -20px;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.gal .lbn.l {
+  left: 14px;
+}
+
+.gal .lbn.r {
+  right: 14px;
+}
+
+.gal .intro {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 10, 16, 0.35);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.8s, visibility 0.8s;
+}
+
+.gal .intro.off {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.gal .box {
+  width: min(440px, 100%);
+  padding: 32px 28px 26px;
+  border-radius: 28px;
+  background: var(--ui);
+  border: 1px solid var(--bd);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  text-align: center;
+}
+
+.gal .box h2 {
+  margin: 0;
+  font: 500 clamp(36px, 9vw, 54px) / 1.02 'Bodoni Moda', Georgia, serif;
+}
+
+.gal .box p {
+  margin: 10px 0 0;
+  opacity: 0.75;
+}
+
+.gal .box ul {
+  list-style: none;
+  margin: 22px 0;
+  padding: 0;
+  text-align: left;
+}
+
+.gal .box li {
+  padding: 11px 0;
+  border-top: 1px solid var(--bd);
+  font-size: 14px;
+}
+
+.gal {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  --ui-solid: rgba(255, 255, 255, 0.94);
+}
+
+html.dark .gal,
+html[data-theme='dark'] .gal {
+  --ui-solid: rgba(18, 20, 28, 0.94);
+}
+
+.gal[data-q='low'] .gl,
+.gal[data-q='low'] .intro,
+.gal[data-q='low'] .box {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.gal[data-q='low'] .gl,
+.gal[data-q='low'] .box {
+  background: var(--ui-solid);
+}
+
+.gal .scrim {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.gal .scrim.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .gal button:hover {
+    background: none;
+  }
+
+  .gal .main:hover {
+    opacity: 1;
+    background: var(--fg);
+  }
+}
+
+@media (max-width: 700px),
+(pointer: coarse) {
+  .gal .scrim {
+    display: block;
+  }
+
+  .gal .dock {
+    padding: 5px;
+  }
+
+  .gal .dock button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .gal .dock .ic {
+    width: 22px;
+    height: 22px;
+  }
+
+  .gal .drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: min(74dvh, 620px);
+    padding: 6px 14px calc(14px + env(safe-area-inset-bottom));
+    border-radius: 26px 26px 0 0;
+    transform: translateY(105%);
+    z-index: 3;
+  }
+
+  .gal .drawer.on {
+    transform: none;
+  }
+
+  .gal .drawer::before {
+    content: '';
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 4px auto 8px;
+    border-radius: 4px;
+    background: currentColor;
+    opacity: 0.25;
+  }
+
+  .gal #dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .gal #dl button {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-content: start;
+    border-radius: 16px;
+  }
+
+  .gal #dl img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .gal .card {
+    padding: 10px 10px 10px 16px;
+    gap: 8px;
+  }
+
+  .gal .ct b {
+    font-size: 19px;
+  }
+
+  .gal .ca .main {
+    padding: 0 14px;
+  }
+
+  .gal .lb img {
+    max-width: 96%;
+    max-height: calc(100dvh - 170px);
+  }
+
+  .gal .lbn {
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 18px);
+    margin: 0;
+    width: 48px;
+    height: 48px;
+  }
+
+  .gal .lbt {
+    padding: max(12px, env(safe-area-inset-top)) 14px 12px;
+    font-size: 16px;
+  }
+
+  .gal .box {
+    padding: 26px 20px 20px;
+    border-radius: 24px;
+  }
+
+  .gal .box .main {
+    width: 100%;
+    height: 48px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .gal .drawer {
+    top: 0;
+    left: auto;
+    right: 0;
+    bottom: 0;
+    width: min(360px, 60%);
+    height: auto;
+    border-radius: 22px 0 0 22px;
+    transform: translateX(105%);
+  }
+
+  .gal .drawer.on {
+    transform: none;
+  }
+
+  .gal .drawer::before {
+    display: none;
+  }
+
+  .gal .card {
+    left: 12px;
+    transform: translate(0, -12px);
+    width: min(380px, 52%);
+  }
+
+  .gal .card.on {
+    transform: none;
+  }
+
+  .gal .dock button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .gal .map {
+    display: none !important;
+  }
+
+  .gal .box {
+    padding: 18px 20px;
+  }
+
+  .gal .box ul {
+    margin: 12px 0;
+  }
+
+  .gal .box li {
+    padding: 8px 0;
+  }
+
+  .gal .lb img {
+    max-height: calc(100dvh - 90px);
+  }
+
+  .gal .lbn {
+    bottom: auto;
+    top: 50%;
+    margin-top: -24px;
+  }
+}
