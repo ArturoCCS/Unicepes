@@ -1,0 +1,170 @@
+---
+interface Props {
+  text?: string;
+  id?: string;
+  tone?: "dark" | "light";
+  size?: "md" | "lg" | "xl";
+  wrap?: boolean;
+  subtle?: boolean;
+}
+
+const {
+  text = "",
+  id,
+  tone = "dark",
+  size = "lg",
+  wrap = false,
+  subtle = false,
+} = Astro.props;
+
+const scale = { md: 0.6, lg: 1, xl: 1.25 }[size];
+const n = (v: number) => Number((v * scale).toFixed(2));
+
+const filterId = `wm-deboss-${Math.random().toString(36).slice(2, 8)}`;
+
+const longest = wrap
+  ? Math.max(...text.trim().split(/\s+/).map((w) => w.length))
+  : text.length;
+const chars = Math.max(longest, 1);
+---
+
+<div
+  id={id}
+  class:list={[
+    "watermark",
+    `watermark--${tone}`,
+    `watermark--${size}`,
+    { "is-wrap": wrap, "is-subtle": subtle },
+  ]}
+  style={`filter: url(#${filterId}); --wm-chars: ${chars};`}
+  aria-hidden="true"
+>
+  <svg class="watermark-filter-def" aria-hidden="true" focusable="false">
+    <defs>
+      <filter
+        id={filterId}
+        x="-8%"
+        y="-15%"
+        width="116%"
+        height="130%"
+        color-interpolation-filters="sRGB"
+      >
+        <feComponentTransfer in="SourceAlpha" result="inverse">
+          <feFuncA type="table" tableValues="1 0" />
+        </feComponentTransfer>
+
+        <feFlood style="flood-color: var(--wm-fill);" result="fillColor" />
+        <feComposite in="fillColor" in2="SourceAlpha" operator="in" result="fill" />
+
+        <feGaussianBlur in="inverse" stdDeviation={n(5)} result="softBlur" />
+        <feOffset in="softBlur" dx={n(1)} dy={n(5)} result="softOffset" />
+        <feFlood style="flood-color: var(--wm-shadow-soft);" result="softColor" />
+        <feComposite in="softColor" in2="softOffset" operator="in" result="softTinted" />
+        <feComposite in="softTinted" in2="SourceAlpha" operator="in" result="innerSoft" />
+
+        <feGaussianBlur in="inverse" stdDeviation={n(1.1)} result="tightBlur" />
+        <feOffset in="tightBlur" dx={n(0.8)} dy={n(2)} result="tightOffset" />
+        <feFlood style="flood-color: var(--wm-shadow-tight);" result="tightColor" />
+        <feComposite in="tightColor" in2="tightOffset" operator="in" result="tightTinted" />
+        <feComposite in="tightTinted" in2="SourceAlpha" operator="in" result="innerTight" />
+
+        <feGaussianBlur in="inverse" stdDeviation={n(0.8)} result="lightBlur" />
+        <feOffset in="lightBlur" dx="0" dy={-n(1.2)} result="lightOffset" />
+        <feFlood style="flood-color: var(--wm-inner-light);" result="lightColor" />
+        <feComposite in="lightColor" in2="lightOffset" operator="in" result="lightTinted" />
+        <feComposite in="lightTinted" in2="SourceAlpha" operator="in" result="innerLight" />
+
+        <feOffset in="SourceAlpha" dx="0" dy={n(1.4)} result="lipShift" />
+        <feGaussianBlur in="lipShift" stdDeviation={n(0.5)} result="lipBlur" />
+        <feComposite in="lipBlur" in2="SourceAlpha" operator="out" result="lipShape" />
+        <feFlood style="flood-color: var(--wm-lip);" result="lipColor" />
+        <feComposite in="lipColor" in2="lipShape" operator="in" result="lip" />
+
+        <feMerge>
+          <feMergeNode in="fill" />
+          <feMergeNode in="innerSoft" />
+          <feMergeNode in="innerTight" />
+          <feMergeNode in="innerLight" />
+          <feMergeNode in="lip" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+  {text}<slot />
+</div>
+
+<style>
+  .watermark-filter-def {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .watermark {
+    --wm-max: clamp(4rem, 15vw, 16rem);
+    --wm-fit: 90vw;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+
+    translate: -50% -50%;
+
+    color: #000;
+
+    font-family: var(--font-title);
+    font-weight: 900;
+    font-size: min(var(--wm-max), calc(var(--wm-fit) / var(--wm-chars, 1)));
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.045em;
+    word-spacing: 0;
+    white-space: nowrap;
+
+    user-select: none;
+    pointer-events: none;
+
+    transition:
+      opacity 0.18s ease,
+      transform 0.3s ease;
+  }
+
+  .watermark.is-subtle {
+    opacity: 0.6;
+  }
+
+  .watermark--light {
+    --wm-fill: #100e0e;
+    --wm-shadow-soft: rgb(0 0 0 / 0.6);
+    --wm-shadow-tight: rgb(0 0 0 / 0.9);
+    --wm-inner-light: rgb(255 255 255 / 0.06);
+    --wm-lip: rgb(255 255 255 / 0.12);
+  }
+
+  .watermark--md {
+    --wm-max: clamp(2.5rem, 12vw, 12rem);
+  }
+
+  .watermark--lg {
+    --wm-max: clamp(4rem, 15vw, 16rem);
+  }
+
+  .watermark--xl {
+    --wm-max: clamp(5rem, 18vw, 18rem);
+  }
+
+  .watermark.is-wrap {
+    width: 90%;
+    white-space: normal;
+    line-height: 0.95;
+  }
+
+  @media (max-width: 768px) {
+    .watermark--md.is-wrap {
+      --wm-max: clamp(2.8rem, 14vw, 4.5rem);
+    }
+  }
+</style>

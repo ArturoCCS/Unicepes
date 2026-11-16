@@ -1,0 +1,33 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import Gallery3D from '../../../components/galeria/Gallery3D.astro';
+import { getSalas } from '../../../data/salas';
+import { ROUTES } from '../../../config/routes';
+
+export async function getStaticPaths() {
+  const salas = await getSalas();
+  return salas.map((sala) => ({ params: { sala: sala.slug }, props: { sala } }));
+}
+
+const { sala } = Astro.props;
+const portada = sala.obras.find((o) => o.image)?.image;
+---
+
+<AppLayout
+  title={sala.nombre}
+  description={sala.descripcionSeo}
+  showTitle={false}
+  back={ROUTES.ilustracion}
+  image={portada}
+  breadcrumbs={[
+    { name: 'Inicio', href: ROUTES.home },
+    { name: 'Trabajos creativos', href: ROUTES.trabajos },
+    { name: 'Dibujo e ilustración', href: ROUTES.ilustracion },
+    { name: sala.nombre, href: ROUTES.sala(sala.slug) },
+  ]}
+>
+  <Gallery3D slug={sala.slug} />
+  <noscript>
+    <p style="padding:2rem">Esta sala es un recorrido 3D y necesita JavaScript. <a href={ROUTES.ilustracion}>Volver a las salas</a>.</p>
+  </noscript>
+</AppLayout>

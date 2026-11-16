@@ -1,0 +1,79 @@
+---
+import type { ImageMetadata } from 'astro';
+import Img from '../ui/Img.astro';
+
+interface Props {
+  image?: ImageMetadata;
+  alt?: string;
+  title?: string;
+  description?: string;
+  size?: number;
+  color?: string;
+}
+
+const { image, alt = '', title, description, size = 1, color } = Astro.props;
+---
+
+<button
+  type="button"
+  class="node"
+  style={`--size:${size};`}
+  data-title={title}
+  data-description={description}
+  aria-label={title ?? alt ?? 'Abrir imagen'}
+>
+  <figure class="card">
+    <Img src={image} alt={alt} widths={[240, 480, 720]} sizes="(min-width: 1500px) 340px, 22vw" color={color} draggable="false" />
+  </figure>
+  {title && <span class="label" aria-hidden="true">{title}</span>}
+</button>
+
+<style>
+  .node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(clamp(56px, 9vw, 150px) * var(--size));
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: inherit;
+    opacity: 0;
+    will-change: transform, opacity;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .node:focus-visible { outline: none; }
+
+  .card {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 6px;
+    background-color: var(--tile-bg);
+    transition: transform 0.35s ease;
+  }
+  .card :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .node:hover .card,
+  .node:focus-visible .card { transform: scale(1.1); }
+
+  .label {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .node:hover .label,
+  .node:focus-visible .label { opacity: 1; }
+</style>

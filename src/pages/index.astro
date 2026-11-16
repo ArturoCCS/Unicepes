@@ -1,77 +1,116 @@
 ---
-import Button from "../components/Button.astro";
-import "../styles/global.css";
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import Img from '../components/ui/Img.astro';
+import ThemeToggle from '../components/ui/ThemeToggle.astro';
+import { loadImage } from '../lib/images';
+import { ROUTES } from '../config/routes';
+import '@fontsource/poppins/latin-700.css';
+
+const hero = (await loadImage('home/hero')) ?? (await loadImage('fotografia/naturaleza/02'));
 ---
 
-<!doctype html>
-<html lang="es">
-   <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      <link rel="icon" href="/favicon.ico" />
-      <meta name="generator" content={Astro.generator} />
-      <title>Inicio</title>
-   </head>
-   <body>
-      <header class="header-container">
-         <h1>Página del área de diseño.</h1>
-      </header>
+<BaseLayout
+  isHome
+  image={hero}
+  imageAlt="Portafolio del área de diseño de UNICEPES"
+>
+  <div class="home">
+    {
+      hero && (
+        <Img
+          class="home__bg"
+          src={hero}
+          alt=""
+          priority
+          widths={[640, 1024, 1600, 2200, 2560]}
+          sizes="100vw"
+          color="var(--home-bg)"
+        />
+      )
+    }
 
-      <main class="main-container">
-         <section class="container">
-            <Button href="alumnos" size="xl" variant="primary" type="button">Alumnos</Button>
-            <Button href="coming-soon" size="xl" variant="primary" type="button">Sobre la carrera</Button>
-            <Button href="trabajos-creativos" size="xl" variant="primary" type="button">Trabajos creativos</Button>
-         </section>
-      </main>
-   </body>
-</html>
+    <ThemeToggle class="home__theme" />
+
+    <header class="home__header">
+      <h1>Página del área de diseño.</h1>
+    </header>
+
+    <main class="home__main">
+      <nav class="home__links" aria-label="Secciones principales">
+        <Button href={ROUTES.alumnos} size="xl" variant="primary">Alumnos</Button>
+        <Button href={ROUTES.sobre} size="xl" variant="primary">Sobre la carrera</Button>
+        <Button href={ROUTES.trabajos} size="xl" variant="primary">Trabajos creativos</Button>
+      </nav>
+    </main>
+  </div>
+</BaseLayout>
 
 <style>
-   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+  .home {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(1.5rem, 5vw, 2.5rem);
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: clamp(1.5rem, 5vh, 2.5rem) max(5vw, env(safe-area-inset-right)) max(clamp(1.5rem, 5vh, 2.5rem), env(safe-area-inset-bottom)) max(5vw, env(safe-area-inset-left));
+    background-color: var(--home-bg);
+    color: var(--home-ink);
+    text-align: center;
+    overflow: hidden;
+  }
 
-   body {
-      margin: 0;
-      -webkit-font-smoothing: antialiased;
-      box-sizing: border-box;
-      min-height: 100vh;
-      padding: 40px 5vw;
-      background-image:
-         linear-gradient(rgba(0, 0, 0, 0.5), rgba(16, 16, 15, 0.307)),
-         url(https://picsum.photos/800/400);
-      background-size: cover;
-      background-position: center;
-      color: #e9e0da;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 2.5rem;
-      text-align: center;
-   }
+  .home :global(.home__bg) {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
 
-   .header-container,
-   .main-container {
-      width: 100%;
-      max-width: 1200px;
-   }
+  .home::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(var(--home-veil-a), var(--home-veil-b));
+  }
 
-   .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5rem;
-      width: 100%;
-   }
+  .home :global(.home__theme) {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    right: max(1rem, env(safe-area-inset-right));
+    z-index: 2;
+    color: var(--home-ink);
+  }
 
-   h1 {
-      text-wrap: balance;
-      font-size: clamp(2rem, 5vw, 4.2rem);
-      line-height: 1.1;
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      font-weight: 700;
-   }
+  .home__header,
+  .home__main {
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  h1 {
+    margin: 0;
+    text-wrap: balance;
+    font-size: clamp(2rem, 5vw, 4.2rem);
+    line-height: 1.1;
+    font-family: 'Poppins', var(--font-alt);
+    font-weight: 700;
+  }
+
+  .home__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: 100%;
+  }
 </style>

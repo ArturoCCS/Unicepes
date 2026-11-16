@@ -1,28 +1,28 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Credential from "../components/Credential.astro";
-
+import AppLayout from "../layouts/AppLayout.astro";
+import Credential from "../components/alumnos/Credential.astro";
+import Watermark from "../components/ui/Watermark.astro";
 import backIcon from "../assets/back.svg";
+import { alumnos as lista } from "../data/alumnos";
+import { loadImage } from "../lib/images";
+import { ROUTES } from "../config/routes";
 
-const alumnos = [
-    { name: "", semester: "", color: "" },
-    { name: "", semester: "", color: "" },
-    { name: "", semester: "", color: "" },
-    { name: "", semester: "", color: "" },
-    { name: "", semester: "", color: "" },
-    { name: "", semester: "", color: "" },
-];
+const alumnos = await Promise.all(lista.map(async (a) => ({ ...a, photo: await loadImage(`alumnos/${a.slug}`) })));
 ---
 
-<Layout title="Alumnos">
+<AppLayout
+    title="Alumnos"
+    description="Conoce a los alumnos del área de diseño de UNICEPES: recorre el carrusel de credenciales."
+    breadcrumbs={[
+        { name: "Inicio", href: ROUTES.home },
+        { name: "Alumnos", href: ROUTES.alumnos },
+    ]}
+>
     <div
         id="page-bg"
         class="page-background"
-        style={`--bg-color: ${alumnos[0].color};`}
+        style={alumnos[0].color ? `--bg-color: ${alumnos[0].color};` : undefined}
     >
-        <div id="bg-text" class="bg-watermark" aria-hidden="true">
-            {alumnos[0].name}
-        </div>
 
         <div class="carrusel-wrapper">
             <div
@@ -45,6 +45,7 @@ const alumnos = [
                             <Credential
                                 name={alumno.name}
                                 semester={alumno.semester}
+                                photo={alumno.photo}
                             />
                         </div>
                     ))
@@ -59,7 +60,7 @@ const alumnos = [
                 id="last"
                 aria-label="Anterior"
             >
-                <img src={backIcon.src} alt="" />
+                <img src={backIcon.src} width={backIcon.width} height={backIcon.height} alt="" />
             </button>
             <button
                 type="button"
@@ -67,11 +68,11 @@ const alumnos = [
                 id="next"
                 aria-label="Siguiente"
             >
-                <img src={backIcon.src} alt="" />
+                <img src={backIcon.src} width={backIcon.width} height={backIcon.height} alt="" />
             </button>
         </div>
     </div>
-</Layout>
+</AppLayout>
 
 <style>
     .page-background {
@@ -81,7 +82,7 @@ const alumnos = [
         width: 100%;
         display: grid;
         grid-template-rows: minmax(0, 1fr) auto;
-        background-color: var(--bg-color);
+        background-color: var(--bg-color, var(--bg));
         transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         overflow: hidden;
     }
@@ -123,28 +124,10 @@ const alumnos = [
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: center;
-        background: rgb(27, 26, 26);
+        background: var(--pill);
         border-radius: 40px 40px 0 0;
         box-sizing: content-box;
         padding-bottom: env(safe-area-inset-bottom);
-    }
-    .bg-watermark {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        translate: -50% -50%;
-        font-size: clamp(4rem, 18vw, 14rem);
-        font-weight: 900;
-        color: rgba(255, 255, 255, 0.08);
-        text-transform: uppercase;
-        letter-spacing: -2px;
-        user-select: none;
-        pointer-events: none;
-        white-space: nowrap;
-        transition:
-            opacity 0.18s ease,
-            transform 0.3s ease;
-        z-index: 1;
     }
 
     .carrusel-wrapper {
@@ -179,7 +162,7 @@ const alumnos = [
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: center;
-        background: rgb(27, 26, 26);
+        background: var(--pill);
         border-radius: 40px 40px 0 0;
         box-sizing: content-box;
         padding-bottom: env(safe-area-inset-bottom);
@@ -190,7 +173,7 @@ const alumnos = [
     }
 
     #carrusel-container:focus-visible {
-        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline: 2px solid var(--on-pill-focus);
         outline-offset: -6px;
         border-radius: 12px;
     }
@@ -238,7 +221,7 @@ const alumnos = [
     }
 
     .nav-btn:focus-visible {
-        outline: 2px solid #fff;
+        outline: 2px solid var(--on-pill);
         outline-offset: -8px;
         border-radius: 50px;
     }
@@ -262,5 +245,5 @@ const alumnos = [
 </style>
 
 <script>
-    import "../js/carruselAlumnos";
+    import "../scripts/alumnos-carousel";
 </script>

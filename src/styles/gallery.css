@@ -1,26 +1,26 @@
 .gal {
-  --ui: rgba(255, 255, 255, 0.74);
-  --bd: rgba(255, 255, 255, 0.6);
-  --fg: #1d1a16;
-  --bgs: #fff;
+  --ui: light-dark(rgba(255, 255, 255, 0.74), rgba(18, 20, 28, 0.68));
+  --bd: light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.13));
+  --fg: light-dark(#1d1a16, #f2ebdc);
+  --bgs: light-dark(#fff, #14161c);
+  --ui-solid: light-dark(rgba(255, 255, 255, 0.94), rgba(18, 20, 28, 0.94));
+  --gal-bg: #0b0d14;
+  --gal-hover: rgba(128, 128, 128, 0.2);
+  --gal-veil: rgba(8, 10, 16, 0.35);
+  --lb-bg: rgba(8, 7, 6, 0.95);
+  --lb-fg: #f2ebdc;
+  --lb-bd: rgba(255, 255, 255, 0.25);
+  --lb-shadow: #000a;
   --gap: max(16px, env(safe-area-inset-bottom));
   position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  background: #0b0d14;
+  background: var(--gal-bg);
   touch-action: none;
   color: var(--fg);
-  font: 400 14px 'DM Sans', system-ui, sans-serif;
-}
-
-html.dark .gal,
-html[data-theme='dark'] .gal {
-  --ui: rgba(18, 20, 28, 0.68);
-  --bd: rgba(255, 255, 255, 0.13);
-  --fg: #f2ebdc;
-  --bgs: #14161c;
+  font: 400 14px 'DM Sans Variable', system-ui, sans-serif;
 }
 
 .gal .cv {
@@ -40,13 +40,13 @@ html[data-theme='dark'] .gal {
 .gal .gl {
   background: var(--ui);
   border: 1px solid var(--bd);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px var(--shadow-md);
   backdrop-filter: blur(16px) saturate(1.3);
   -webkit-backdrop-filter: blur(16px) saturate(1.3);
 }
 
 .gal button {
-  font: 500 13px 'DM Sans', system-ui, sans-serif;
+  font: 500 13px 'DM Sans Variable', system-ui, sans-serif;
   color: inherit;
   background: none;
   border: 0;
@@ -58,7 +58,7 @@ html[data-theme='dark'] .gal {
 }
 
 .gal button:hover {
-  background: rgba(128, 128, 128, 0.2);
+  background: var(--gal-hover);
 }
 
 .gal button:focus-visible {
@@ -166,7 +166,7 @@ html[data-theme='dark'] .gal .ic-moon {
 }
 
 .gal .ct b {
-  font: italic 500 22px / 1.15 'Bodoni Moda', Georgia, serif;
+  font: italic 500 22px / 1.15 'Bodoni Moda Variable', Georgia, serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -282,7 +282,7 @@ html[data-theme='dark'] .gal .ic-moon {
 }
 
 .gal .drawer header b {
-  font: italic 500 26px 'Bodoni Moda', Georgia, serif;
+  font: italic 500 26px 'Bodoni Moda Variable', Georgia, serif;
 }
 
 .gal #dl {
@@ -326,9 +326,9 @@ html[data-theme='dark'] .gal .ic-moon {
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 7, 6, 0.95);
+  background: var(--lb-bg);
   overflow: hidden;
-  color: #f2ebdc;
+  color: var(--lb-fg);
 }
 
 .gal .lb.on {
@@ -346,13 +346,13 @@ html[data-theme='dark'] .gal .ic-moon {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  font: italic 500 18px 'Bodoni Moda', Georgia, serif;
+  font: italic 500 18px 'Bodoni Moda Variable', Georgia, serif;
 }
 
 .gal .lbt button {
   height: 40px;
   padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--lb-bd);
   flex: none;
 }
 
@@ -360,7 +360,7 @@ html[data-theme='dark'] .gal .ic-moon {
   max-width: 92%;
   max-height: 80%;
   cursor: zoom-in;
-  box-shadow: 0 30px 80px #000a;
+  box-shadow: 0 30px 80px var(--lb-shadow);
   touch-action: none;
   will-change: transform;
 }
@@ -378,7 +378,7 @@ html[data-theme='dark'] .gal .ic-moon {
   top: 50%;
   margin-top: -20px;
   z-index: 2;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--lb-bd);
 }
 
 .gal .lbn.l {
@@ -396,7 +396,7 @@ html[data-theme='dark'] .gal .ic-moon {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(8, 10, 16, 0.35);
+  background: var(--gal-veil);
   backdrop-filter: blur(10px);
   transition: opacity 0.8s, visibility 0.8s;
 }
@@ -413,14 +413,14 @@ html[data-theme='dark'] .gal .ic-moon {
   border-radius: 28px;
   background: var(--ui);
   border: 1px solid var(--bd);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 30px 80px var(--shadow-lg);
   backdrop-filter: blur(20px);
   text-align: center;
 }
 
 .gal .box h2 {
   margin: 0;
-  font: 500 clamp(36px, 9vw, 54px) / 1.02 'Bodoni Moda', Georgia, serif;
+  font: 500 clamp(36px, 9vw, 54px) / 1.02 'Bodoni Moda Variable', Georgia, serif;
 }
 
 .gal .box p {
@@ -447,12 +447,6 @@ html[data-theme='dark'] .gal .ic-moon {
   -webkit-touch-callout: none;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
-  --ui-solid: rgba(255, 255, 255, 0.94);
-}
-
-html.dark .gal,
-html[data-theme='dark'] .gal {
-  --ui-solid: rgba(18, 20, 28, 0.94);
 }
 
 .gal[data-q='low'] .gl,
@@ -472,7 +466,7 @@ html[data-theme='dark'] .gal {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--scrim);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;

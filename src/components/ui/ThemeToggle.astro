@@ -1,0 +1,80 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button type="button" class:list={['theme-toggle', className]} data-theme-toggle aria-label="Cambiar entre modo claro y oscuro" aria-pressed="false">
+  <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 14.5A9 9 0 0 1 9.5 3a9 9 0 1 0 11.5 11.5z"></path>
+  </svg>
+  <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .theme-toggle:hover {
+    background: var(--hover-tint);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.92);
+  }
+
+  .theme-toggle__icon {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .theme-toggle__icon--sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle__icon--sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle__icon--moon {
+    display: none;
+  }
+</style>
+
+<script>
+  import { onThemeChange, toggleTheme } from '../../scripts/theme';
+
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+  buttons.forEach((button) => button.addEventListener('click', toggleTheme));
+
+  onThemeChange((theme) => {
+    buttons.forEach((button) => button.setAttribute('aria-pressed', String(theme === 'dark')));
+  });
+</script>

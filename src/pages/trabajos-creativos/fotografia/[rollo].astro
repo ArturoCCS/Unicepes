@@ -1,0 +1,53 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import Tira from '../../../components/fotografia/Tira.astro';
+import Visor from '../../../components/fotografia/Visor.astro';
+import { getRollos, cantidad } from '../../../data/rollos';
+import { ROUTES } from '../../../config/routes';
+import '../../../styles/fotografia.css';
+
+export async function getStaticPaths() {
+  const rollos = await getRollos();
+  return rollos.map((rollo) => ({ params: { rollo: rollo.id }, props: { rollo } }));
+}
+
+const { rollo } = Astro.props;
+const n = cantidad(rollo);
+---
+
+<AppLayout
+  title={rollo.nombre}
+  description={rollo.descripcion}
+  back={ROUTES.fotografia}
+  image={rollo.fotos[0]?.meta}
+  imageAlt={rollo.fotos[0]?.alt}
+  breadcrumbs={[
+    { name: 'Inicio', href: ROUTES.home },
+    { name: 'Trabajos creativos', href: ROUTES.trabajos },
+    { name: 'Fotografía', href: ROUTES.fotografia },
+    { name: rollo.nombre, href: ROUTES.rollo(rollo.id) },
+  ]}
+>
+  <section class="galeria">
+    <p class="sub">{rollo.texto ? `${rollo.texto} · ` : ''}{n} fotografías</p>
+    <Tira rollo={rollo} />
+    <Visor rollo={rollo} />
+  </section>
+</AppLayout>
+
+<style>
+  .galeria {
+    height: 100%;
+    min-height: 0;
+    container-type: size;
+    display: flex;
+    flex-direction: column;
+  }
+  .sub {
+    margin: 0;
+    text-align: center;
+    color: var(--foto-mut);
+    font: 300 15px var(--foto-texto);
+    letter-spacing: 0.02em;
+  }
+</style>

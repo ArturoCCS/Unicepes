@@ -1,11 +1,12 @@
 ---
 import Bote from './Bote.astro';
 import { cantidad, type Rollo } from '../../data/rollos';
+import { ROUTES } from '../../config/routes';
 interface Props { rollo: Rollo }
 const { rollo } = Astro.props;
 const n = cantidad(rollo);
 ---
-<a class="roll" href={`/fotografia/${rollo.id}`} aria-label={`${rollo.nombre}, ${n} fotografías`}>
+<a class="roll" href={ROUTES.rollo(rollo.id)} aria-label={`${rollo.nombre}, ${n} fotografías`}>
   <span class="cw">
     <span class="ci" style={`view-transition-name:can-${rollo.id}`}><Bote rollo={rollo} /></span>
   </span>
@@ -18,7 +19,7 @@ const n = cantidad(rollo);
 <style>
   .roll { display: flex; flex-direction: column; align-items: center; color: inherit; text-decoration: none; transition: opacity .5s; }
   .cw { display: block; width: 70%; }
-  .ci { display: block; aspect-ratio: 120 / 190; transition: transform .45s cubic-bezier(.3, .8, .3, 1); filter: drop-shadow(0 16px 14px rgba(0, 0, 0, .14)); }
+  .ci { display: block; aspect-ratio: 120 / 190; transition: transform .45s cubic-bezier(.3, .8, .3, 1); filter: drop-shadow(0 16px 14px var(--shadow-sm)); }
   .roll:hover .ci, .roll:focus-visible .ci { transform: translateY(-14px) rotate(-4deg); }
   .roll:focus-visible { outline: 2px solid var(--foto-ink); outline-offset: 6px; border-radius: 12px; }
   :global(.scene:has(.roll:hover)) .roll:not(:hover) { opacity: .4; }

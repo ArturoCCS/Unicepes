@@ -1,0 +1,109 @@
+---
+import Watermark from './Watermark.astro';
+
+interface Props {
+  title: string;
+  badge?: string;
+  code?: string;
+  watermark?: string;
+  float?: boolean;
+}
+
+const { title, badge, code, watermark, float = false } = Astro.props;
+---
+
+<div class="page">
+  {watermark && <Watermark text={watermark} size="xl" subtle />}
+
+  <div class="wrap">
+    <div class:list={['card', { 'is-float': float }]}>
+      {badge && <span class="badge">{badge}</span>}
+      {code && <span class="code">{code}</span>}
+      <h2 class="title">{title}</h2>
+      <div class="text"><slot /></div>
+      <div class="actions"><slot name="actions" /></div>
+      <slot name="status" />
+    </div>
+  </div>
+</div>
+
+<style>
+  .page {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 600px;
+    padding: var(--space-5);
+  }
+
+  .card {
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.75rem, 1rem + 3vw, 3rem) clamp(1.25rem, 0.5rem + 3vw, 2.5rem);
+    text-align: center;
+    box-shadow: 0 20px 40px var(--shadow-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .card.is-float { animation: card-float 6s ease-in-out infinite; }
+
+  @keyframes card-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .badge {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+  }
+
+  .code {
+    font-family: var(--font-title);
+    font-size: clamp(4.5rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+  }
+
+  .title {
+    margin: 0;
+    font-size: clamp(1.8rem, 1.2rem + 2.4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .text {
+    font-size: clamp(1.15rem, 1rem + 0.6vw, 1.5rem);
+    color: var(--dim);
+    line-height: 1.5;
+    max-width: 440px;
+  }
+
+  .text :global(p) { margin: 0; }
+
+  .actions:empty { display: none; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+</style>

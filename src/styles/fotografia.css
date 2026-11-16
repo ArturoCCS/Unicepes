@@ -1,14 +1,25 @@
+@import './fonts-fotografia.css';
 
 :root {
-  --foto-bg: #fff;
-  --foto-ink: #0c0c0c;
-  --foto-mut: #8b8b8b;
-  --foto-line: #e8e8e8;
-  --foto-ghost: #f0f0f0;
-  --foto-dk: #151515;
-  --foto-dk2: #2d2d2d;
-  --foto-film: #151515;
-  --foto-display: 'Syne', 'Arial Black', sans-serif;
+  --foto-bg: var(--bg);
+  --foto-ink: var(--ink);
+  --foto-mut: light-dark(#8b8b8b, #8f8f99);
+  --foto-line: light-dark(#e8e8e8, #2c2c35);
+  --foto-ghost: light-dark(#f0f0f0, #17171c);
+  --foto-dk: light-dark(#151515, #2b2b30);
+  --foto-dk2: light-dark(#2d2d2d, #3a3a41);
+  --foto-film: light-dark(#151515, #1c1c20);
+  --foto-metal: light-dark(#c4c4c4, #7a7a80);
+  --foto-metal-2: light-dark(#d6d6d6, #8d8d94);
+  --foto-photo-bg: #0b0b0b;
+  --foto-glint: #fff;
+  --foto-flash: #e0369f;
+  --foto-lens-1: #0b0b0b;
+  --foto-lens-2: #1c1c1c;
+  --foto-lens-ring: #3a3a3a;
+  --foto-lens-3: #14202e;
+  --foto-lens-4: #1d3249;
+  --foto-display: 'Syne Variable', 'Arial Black', sans-serif;
   --foto-texto: 'Oswald', 'Arial Narrow', sans-serif;
 }
 
