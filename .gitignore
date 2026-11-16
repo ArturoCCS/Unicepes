@@ -23,3 +23,6 @@ README.example.md
 
 # jetbrains setting folder
 .idea/
+
+# Originales de máxima calidad que respalda `pnpm images` (no se suben al repo)
+originals/

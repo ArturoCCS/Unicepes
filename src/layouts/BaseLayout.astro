@@ -1,0 +1,54 @@
+---
+import SEO from '../components/seo/SEO.astro';
+import type { Props as SEOProps } from '../components/seo/SEO.astro';
+import '../styles/base.css';
+import titleFont from '@fontsource/special-gothic-expanded-one/files/special-gothic-expanded-one-latin-400-normal.woff2?url';
+import { SITE } from '../config/site';
+
+interface Props extends SEOProps {
+  bodyClass?: string;
+}
+
+const { bodyClass, ...seo } = Astro.props;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="preload" href={titleFont} as="font" type="font/woff2" crossorigin />
+    <SEO {...seo} />
+    <script is:inline define:vars={{ colors: SITE.themeColor }}>
+      const root = document.documentElement;
+      const readSaved = () => {
+        try {
+          const value = localStorage.getItem('theme');
+          return value === 'light' || value === 'dark' ? value : null;
+        } catch {
+          return null;
+        }
+      };
+      const systemDark = matchMedia('(prefers-color-scheme: dark)');
+      const apply = (theme) => {
+        root.dataset.theme = theme;
+        root.classList.toggle('dark', theme === 'dark');
+      };
+      const syncMeta = () => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', colors[root.dataset.theme] ?? colors.light);
+      };
+
+      apply(readSaved() ?? (systemDark.matches ? 'dark' : 'light'));
+      syncMeta();
+      new MutationObserver(syncMeta).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+      systemDark.addEventListener('change', (event) => {
+        if (!readSaved()) apply(event.matches ? 'dark' : 'light');
+      });
+    </script>
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

@@ -18,7 +18,9 @@ const { rollo } = Astro.props;
             stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg
         >
     </button>
-    <div class="card"><div class="big" data-img></div></div>
+    <div class="card">
+        <img class="big" data-img alt="" width="1500" height="1000" decoding="async" />
+    </div>
     <div class="meta"><b>{rollo.nombre}</b><span data-n></span></div>
     <div class="pill">
         <button type="button" data-prev aria-label="Anterior"
@@ -77,18 +79,18 @@ const { rollo } = Astro.props;
         background: var(--foto-bg);
         border-radius: 18px;
         box-shadow:
-            0 30px 70px -26px rgba(0, 0, 0, 0.35),
+            0 30px 70px -26px var(--shadow-lg),
             0 0 0 1px var(--foto-line);
     }
     .big {
+        display: block;
         width: min(88vw, calc((100svh - 260px) * 1.5), 980px);
+        height: auto;
         aspect-ratio: 3 / 2;
+        object-fit: contain;
         border-radius: 10px;
-        background-image: var(--img);
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: #0b0b0b;
+        background-color: var(--foto-photo-bg);
+        background-size: cover;
         transition: opacity 0.2s;
     }
     .meta {
@@ -120,7 +122,7 @@ const { rollo } = Astro.props;
         transition: background 0.2s;
     }
     .ico:hover {
-        background: #f5f5f5;
+        background: var(--foto-ghost);
     }
     .pill {
         position: absolute;
@@ -129,8 +131,8 @@ const { rollo } = Astro.props;
         transform: translateX(-50%);
         display: flex;
         padding: 6px;
-        background: #151515;
-        color: #fff;
+        background: var(--foto-dk);
+        color: var(--foto-glint);
         border-radius: 99px;
     }
     .pill button {
@@ -146,10 +148,10 @@ const { rollo } = Astro.props;
         transition: background 0.2s;
     }
     .pill button:hover {
-        background: #2d2d2d;
+        background: var(--foto-dk2);
     }
     .pill button:focus-visible {
-        outline: 2px solid #fff;
+        outline: 2px solid var(--foto-glint);
         outline-offset: -3px;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -164,27 +166,50 @@ const { rollo } = Astro.props;
 
 <script>
     const dlg = document.querySelector<HTMLDialogElement>("#visor")!;
-    const img = dlg.querySelector<HTMLElement>("[data-img]")!;
+    const img = dlg.querySelector<HTMLImageElement>("[data-img]")!;
     const num = dlg.querySelector<HTMLElement>("[data-n]")!;
     const frames = [...document.querySelectorAll<HTMLElement>("[data-frame]")];
     const pad = (n: number) => String(n).padStart(2, "0");
+    const SIZES = "min(88vw, 980px)";
     let i = 0;
+
+    function paint(k: number) {
+        const f = frames[k];
+        if (f.dataset.src) {
+            img.sizes = SIZES;
+            img.srcset = f.dataset.srcset ?? "";
+            img.src = f.dataset.src;
+            img.alt = f.dataset.alt ?? "";
+            img.style.backgroundImage = "";
+        } else {
+            img.removeAttribute("srcset");
+            img.removeAttribute("src");
+            img.alt = "";
+            img.style.backgroundImage = f.style.getPropertyValue("--ph");
+        }
+    }
+
+    function preloadNeighbors() {
+        for (const d of [-1, 1]) {
+            const src = frames[(i + d + frames.length) % frames.length]?.dataset.src;
+            if (src) new Image().src = src;
+        }
+    }
 
     function show(n: number, first = false) {
         i = (n + frames.length) % frames.length;
-        const set = () => {
-            img.style.setProperty(
-                "--img",
-                frames[i].style.getPropertyValue("--img"),
-            );
+        if (first) {
+            paint(i);
             img.style.opacity = "1";
-        };
-        if (first) set();
-        else {
+        } else {
             img.style.opacity = "0";
-            setTimeout(set, 180);
+            setTimeout(() => {
+                paint(i);
+                img.style.opacity = "1";
+            }, 180);
         }
         num.textContent = `${pad(i + 1)} / ${pad(frames.length)}`;
+        preloadNeighbors();
     }
 
     frames.forEach((f, k) =>
@@ -193,15 +218,9 @@ const { rollo } = Astro.props;
             dlg.showModal();
         }),
     );
-    dlg.querySelector("[data-prev]")!.addEventListener("click", () =>
-        show(i - 1),
-    );
-    dlg.querySelector("[data-next]")!.addEventListener("click", () =>
-        show(i + 1),
-    );
-    dlg.querySelector("[data-cerrar]")!.addEventListener("click", () =>
-        dlg.close(),
-    );
+    dlg.querySelector("[data-prev]")!.addEventListener("click", () => show(i - 1));
+    dlg.querySelector("[data-next]")!.addEventListener("click", () => show(i + 1));
+    dlg.querySelector("[data-cerrar]")!.addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", (e) => {
         if (e.target === dlg) dlg.close();
     });

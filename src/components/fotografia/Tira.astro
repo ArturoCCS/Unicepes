@@ -6,6 +6,22 @@ interface Props {
 }
 const { rollo } = Astro.props;
 const n = cantidad(rollo);
+
+const fotogramas = Array.from({ length: n }, (_, i) => {
+    const foto = rollo.fotos[i];
+    if (!foto) return { i, foto: undefined, placeholder: fondo(rollo, i), srcset: undefined, fullSrcset: undefined };
+    const w = foto.set.width;
+    const w480 = Math.min(480, w);
+    const w1100 = Math.min(1100, w);
+    const w2000 = Math.min(2000, w);
+    return {
+        i,
+        foto,
+        placeholder: undefined,
+        srcset: `${foto.set.thumb} ${w480}w, ${foto.set.md} ${w1100}w`,
+        fullSrcset: `${foto.set.md} ${w1100}w, ${foto.set.full} ${w2000}w`,
+    };
+});
 ---
 
 <div class="tira">
@@ -17,16 +33,34 @@ const n = cantidad(rollo);
             <div class="pull">
                 <div class="strip">
                     {
-                        Array.from({ length: n }, (_, i) => (
+                        fotogramas.map((f) => (
                             <button
                                 type="button"
                                 class="frame"
                                 data-frame
-                                data-i={i}
-                                aria-label={`${rollo.nombre} ${i + 1}`}
-                                style={`--img:${fondo(rollo, i)}`}
+                                data-i={f.i}
+                                aria-label={f.foto ? `Ver ${f.foto.alt}` : `${rollo.nombre} ${f.i + 1}`}
+                                data-src={f.foto?.set.full}
+                                data-srcset={f.fullSrcset}
+                                data-alt={f.foto?.alt}
+                                style={f.placeholder ? `--ph:${f.placeholder}` : undefined}
                             >
-                                <span class="photo" />
+                                {f.foto ? (
+                                    <img
+                                        class="photo"
+                                        src={f.foto.set.md}
+                                        srcset={f.srcset}
+                                        sizes="(max-width: 700px) 60vw, 405px"
+                                        alt={f.foto.alt}
+                                        width={f.foto.set.width}
+                                        height={f.foto.set.height}
+                                        loading={f.i < 3 ? "eager" : "lazy"}
+                                        decoding="async"
+                                        draggable="false"
+                                    />
+                                ) : (
+                                    <span class="photo photo--ph" />
+                                )}
                             </button>
                         ))
                     }
@@ -83,7 +117,7 @@ const n = cantidad(rollo);
         z-index: 2;
         height: var(--H);
         width: calc(var(--H) * 0.6316);
-        filter: drop-shadow(0 18px 16px rgba(0, 0, 0, 0.16));
+        filter: drop-shadow(0 18px 16px var(--shadow-sm));
     }
     .pull {
         overflow: hidden;
@@ -138,28 +172,32 @@ const n = cantidad(rollo);
         padding: 0;
         border: 0;
         border-radius: 3px;
-        background: #0b0b0b;
+        background: var(--foto-photo-bg);
         cursor: pointer;
     }
     .frame:focus-visible {
-        outline: 2px solid #fff;
+        outline: 2px solid var(--foto-glint);
         outline-offset: -4px;
     }
     .photo {
         position: absolute;
         inset: 0;
-        background-image: var(--img);
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: #0b0b0b;
-        transform: scale(
-            1.05
-        );
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        background-color: var(--foto-photo-bg);
+        transform: scale(1.05);
         filter: invert(1) grayscale(1) brightness(0.4) contrast(1.3) blur(7px);
         transition:
             filter 2.6s ease-out,
             transform 2.6s ease-out;
+        -webkit-user-drag: none;
+        user-select: none;
+    }
+    .photo--ph {
+        background-image: var(--ph);
+        background-size: cover;
     }
     .frame.dev .photo {
         filter: none;
@@ -182,7 +220,7 @@ const n = cantidad(rollo);
         border: 1px solid var(--foto-line);
         border-radius: 99px;
         font: 300 13px var(--foto-texto);
-        box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 8px 24px -12px var(--shadow-md);
         pointer-events: none;
         transition: opacity 0.6s;
         animation: aparece 0.8s 3.2s both;

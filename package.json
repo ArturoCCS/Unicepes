@@ -6,16 +6,35 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "node scripts/optimize-images.mjs --quiet && astro dev",
+    "build": "node scripts/optimize-images.mjs && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro-check",
+    "images": "node scripts/optimize-images.mjs",
+    "images:watch": "node scripts/optimize-images.mjs --watch",
+    "images:dry": "node scripts/optimize-images.mjs --dry-run",
+    "trim:stickers": "node scripts/trim-stickers.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/bodoni-moda": "^5.3.0",
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/syne": "^5.3.0",
+    "@fontsource/oswald": "^5.3.0",
+    "@fontsource/pathway-gothic-one": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "@fontsource/special-gothic-expanded-one": "^5.3.0",
     "astro": "^7.3.5",
+    "sharp": "^0.35.5",
     "three": "^0.186.1"
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/three": "^0.187.0",
+    "typescript": "^6.0.3"
   }
 }

@@ -1,0 +1,21 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/layout/Nav.astro';
+import type { Props as SEOProps } from '../components/seo/SEO.astro';
+
+interface Props extends SEOProps {
+  back?: string;
+  showTitle?: boolean;
+  scroll?: boolean;
+}
+
+const { back, showTitle = true, scroll = false, ...seo } = Astro.props;
+---
+
+<BaseLayout {...seo} bodyClass="app-shell">
+  <slot name="head" slot="head" />
+  <Nav title={seo.title} back={back} showTitle={showTitle} />
+  <main id="contenido" class:list={{ 'is-scroll': scroll }}>
+    <slot />
+  </main>
+</BaseLayout>
